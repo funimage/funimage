@@ -1,4 +1,4 @@
-(defproject funimage "0.1.60"
+(defproject funimage/funimage "0.1.60"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -23,8 +23,8 @@
                  [sc.fiji/VIB_ "2.0.3"]
                  [com.github.wendykierp/JTransforms "3.0"]                            
                  
-                 [funimage/mcib3d_plugins "3.3"]
-                 [local/mcib3d-core "3.0"]
+                 ;[funimage/mcib3d_plugins "3.3"]
+                 ;[local/mcib3d-core "3.0"]
                  [me.raynes/fs "1.4.6"]
                  
                  
@@ -32,7 +32,6 @@
   :java-source-paths ["java"]
   :repositories [["imagej" "http://maven.imagej.net/content/groups/hosted/"]
                  ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
-                 ;["imagej-ome" "http://maven.imagej.net/content/repositories/ome-releases/"]
                  ["ome maven" "http://artifacts.openmicroscopy.org/artifactory/maven/"]
                  ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]]                 
   :jvm-opts ["-Xmx32g" "-server"] 
