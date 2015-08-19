@@ -4,5 +4,5 @@
         [clojure.test]))
 
 (deftest test-empty-image
-  (let [imp1 (create-image :width 10 :height 10)]
+  (let [imp1 (create-imp :width 10 :height 10)]
     (is (zero? (:mean (get-image-statistics imp1))))))
