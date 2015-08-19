@@ -21,11 +21,8 @@
                  
                  [sc.fiji/Auto_Threshold "1.16.0"]
                  [sc.fiji/VIB_ "2.0.3"]
-                 ;[sc.fiji/registration_3d "2.0.0"]
-                 ;[edu.mines/mines-jtk "20100113"]
                  [com.github.wendykierp/JTransforms "3.0"]                            
                  
-                 ;[local/DeconvolutionLab "4.02.2014"]
                  [funimage/mcib3d_plugins "3.3"]
                  [local/mcib3d-core "3.0"]
                  [me.raynes/fs "1.4.6"]
@@ -37,9 +34,7 @@
                  ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
                  ;["imagej-ome" "http://maven.imagej.net/content/repositories/ome-releases/"]
                  ["ome maven" "http://artifacts.openmicroscopy.org/artifactory/maven/"]
-                 ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]
-                 #_["snapshots-kyleharrington" "http://kyleharrington.com:8081/nexus/content/repositories/snapshots/"]
-                 #_["thirdparty-kyleharrington" "http://kyleharrington.com:8081/nexus/content/repositories/thirdparty/"]]                 
+                 ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]]                 
   :jvm-opts ["-Xmx32g" "-server"] 
   :javac-options ["-target" "1.6" "-source" "1.6"]
   )
