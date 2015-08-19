@@ -1,10 +1,12 @@
 (defproject funimage/funimage "0.1.61"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :license {:name "Apache v2.0"
+            :url "https://github.com/funimage/funimage/LICENSE"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-
+                 [seesaw "1.4.4"]
+                 [me.raynes/fs "1.4.6"]
+                 
                  [net.imagej/ij "1.49s"]
                  [sc.fiji/imagescience "2.5.0"]
                  [net.imglib2/imglib2 "2.2.1"]
@@ -15,16 +17,13 @@
                  [net.imglib2/imglib2-ops "2.0.0-beta-26"]
 
                  [ome/bioformats_package "5.1.1"]
-                 [seesaw "1.4.4"]
+                 
                  [java3d/j3d-core "1.3.1"]
                  [sc.fiji/AnalyzeSkeleton_ "2.0.4"]
                  
                  [sc.fiji/Auto_Threshold "1.16.0"]
                  [sc.fiji/VIB_ "2.0.3"]
-                 [com.github.wendykierp/JTransforms "3.0"]                            
-
-                 [me.raynes/fs "1.4.6"]
-                 ]
+                 [com.github.wendykierp/JTransforms "3.0"]]
   :java-source-paths ["java"]
   :repositories [["imagej" "http://maven.imagej.net/content/groups/hosted/"]
                  ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
