@@ -1,13 +1,8 @@
-(ns funimage.test.imp.statistics)
+(ns funimage.test.imp.statistics
+  (:use [funimage imp]
+        [funimage.imp  statistics]
+        [clojure.test]))
 
-#_(do 
-    (def filename "/Users/kyle/git/funimage/hello-communist-kitty_bw.tif")
-    (use 'funimage.imp) 
-    (def imp (open-imp filename))
-  
-    (show-imp imp)
-    (println filename)
-    (def stats (get-image-statistics imp :std-dev true :skewness true))
-    (println (:skewness stats))
-    (println stats)
-    )
+(deftest test-empty-image
+  (let [imp1 (create-image :width 10 :height 10)]
+    (is (zero? (:mean (get-image-statistics imp1))))))
