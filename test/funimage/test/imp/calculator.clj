@@ -4,6 +4,6 @@
         [clojure.test]))
 
 (deftest test-create-image
-  (let [imp1 (IJ/openImage "http://imagej.nih.gov/ij/images/boats.gif")        
+  (let [imp1 (ij.IJ/openImage "http://imagej.nih.gov/ij/images/boats.gif")        
         imp2 (imp-sub imp1 imp1)]
     (is (zero? (imp-sum imp2)))))
