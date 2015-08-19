@@ -1,6 +1,6 @@
 (defproject funimage/funimage "0.1.61"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "Functional Image Processing with ImageJ/FIJI"
+  :url "https://github.com/funimage/funimage"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
