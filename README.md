@@ -13,7 +13,7 @@ Citing:
 
 Functional Image Processing with ImageJ/FIJI
 K. Harrington, T. Stiles, L. Venkatraman, K. Bentley
-Proceedings of Bioimage Informatics, 2015.
+Proceedings of Bioimage Informatics, 2015, (accepted).
 
 =========
 
