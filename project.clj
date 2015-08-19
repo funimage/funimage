@@ -1,4 +1,4 @@
-(defproject funimage/funimage "0.1.60"
+(defproject funimage/funimage "0.1.61"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -12,22 +12,18 @@
                  [net.imglib2/imglib2-algorithm-fft "0.1.2"]
                  [net.imglib2/imglib2-algorithm "0.2.1"]
                  [net.imglib2/imglib2-ij "2.0.0-beta-28"]
-                 [net.imglib2/imglib2-ops "2.0.0-SNAPSHOT"]
+                 [net.imglib2/imglib2-ops "2.0.0-beta-26"]
 
                  [ome/bioformats_package "5.1.1"]
                  [seesaw "1.4.4"]
                  [java3d/j3d-core "1.3.1"]
-                 [sc.fiji/AnalyzeSkeleton_ "2.0.3-SNAPSHOT"];temp
+                 [sc.fiji/AnalyzeSkeleton_ "2.0.4"]
                  
                  [sc.fiji/Auto_Threshold "1.16.0"]
                  [sc.fiji/VIB_ "2.0.3"]
                  [com.github.wendykierp/JTransforms "3.0"]                            
-                 
-                 ;[funimage/mcib3d_plugins "3.3"]
-                 ;[local/mcib3d-core "3.0"]
+
                  [me.raynes/fs "1.4.6"]
-                 
-                 
                  ]
   :java-source-paths ["java"]
   :repositories [["imagej" "http://maven.imagej.net/content/groups/hosted/"]
