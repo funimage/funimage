@@ -4,6 +4,7 @@ funimage
 Functional Image Processing with ImageJ/FIJI
 
 [![Build Status](https://travis-ci.org/funimage/funimage.svg?branch=master)](https://travis-ci.org/funimage/funimage)
+[![Clojars Project](http://clojars.org/funimage/latest-version.svg)](http://clojars.org/funimage)
 
 =========
 

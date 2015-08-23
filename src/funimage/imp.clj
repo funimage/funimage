@@ -757,4 +757,12 @@
   "Update the display of an imp."
   [imp]
   (.updateAndRepaintWindow imp))
+        
+(defn open-image-sequence
+  "Open an image sequence."
+  [directory]
+  (ij.IJ/run "Image Sequence..." (str "open=" directory " sort"))
+  (ij.IJ/getImage))  
+
+   
   
