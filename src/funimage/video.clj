@@ -14,12 +14,18 @@
   [directory]
   (let [listing (.listFiles (java.io.File. directory))]
     (zconcat-imps
-      (for [file listing]
-        (let [imp (open-imp (.getAbsolutePath file))]
-          (ij.IJ/run imp "Hyperstack to Stack" "")
-          (let [conv ^ij.process.ImageConverter. (ij.process.ImageConverter. imp)]            
+      (for [file (rest listing)]; personal convenience hack for a project... shame
+        (let [imp (open-imp (.getAbsolutePath file))
+              imp2 (.createImagePlus imp)
+              dim (.getDimensions imp)]
+          (.setStack imp2 (get-title imp) (.getImageStack imp))
+          (.setDimensions imp2 (nth dim 2) (nth dim 3) (nth dim 4))
+          (.setColorModel (.getProcessor imp2) (.getDefaultColorModel (.getProcessor imp)))
+          (.setOpenAsHyperStack imp2 false)
+          (let [conv ^ij.process.ImageConverter. (ij.process.ImageConverter. imp2)]
             (.convertRGBStackToRGB conv)
-            imp))))))
+            imp2
+            ))))))
 
 (defn tga-sequence-to-avi
   "Take a TGA (RAW) sequence as a directory, and make an avi."
@@ -27,3 +33,5 @@
   (let [imp (open-tga-directory directory)]
     (save-z-as-avi imp avi-filename)))
 
+#_(tga-sequence-to-avi "/Users/kyle/git/brevis-vasculajure/experiment_Recovery1_MO_tipdiv__1248563912044346_fig-generation2/movie"
+                      "/Users/kyle/git/brevis-vasculajure/experiment_Recovery1_MO_tipdiv__1248563912044346_fig-generation2.avi")

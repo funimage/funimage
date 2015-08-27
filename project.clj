@@ -1,4 +1,4 @@
-(defproject funimage/funimage "0.1.65"
+(defproject funimage/funimage "0.1.66"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
