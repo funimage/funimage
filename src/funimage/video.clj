@@ -33,5 +33,3 @@
   (let [imp (open-tga-directory directory)]
     (save-z-as-avi imp avi-filename)))
 
-#_(tga-sequence-to-avi "/Users/kyle/git/brevis-vasculajure/experiment_Recovery1_MO_tipdiv__1248563912044346_fig-generation2/movie"
-                      "/Users/kyle/git/brevis-vasculajure/experiment_Recovery1_MO_tipdiv__1248563912044346_fig-generation2.avi")
