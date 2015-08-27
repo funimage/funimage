@@ -2,11 +2,7 @@
  (:use [funimage imp project]
        [funimage.imp threshold calculator])
  (:require [clojure.string :as string])
- (:import [mpicbg.imglib.image Image]
-          [mpicbg.imglib.cursor Cursor]
-          [script.imglib ImgLib]
-          [mpicbg.imglib.type.numeric NumericType]
-          [ij IJ ImagePlus WindowManager]
+ (:import [ij IJ ImagePlus WindowManager]
           [ij.measure ResultsTable]
           [ij.gui WaitForUserDialog PointRoi NewImage PolygonRoi Roi GenericDialog NonBlockingGenericDialog Line]
           [ij.plugin ImageCalculator Duplicator]
@@ -14,9 +10,7 @@
           [ij.process ImageConverter FloatProcessor ByteProcessor]
           [java.awt Button]
           [java.awt.event ActionListener]
-          [java.io File]
-          #_[weka.clusterers SimpleKMeans]
-          #_[weka.core Instances Attribute DenseInstance]))
+          [java.io File]))
 
 (defn get-results-table
   "Return the current results table."

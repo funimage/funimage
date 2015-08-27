@@ -742,10 +742,11 @@
       (.toWatershed edm ^ImageProcessor (.getProcessor stack (inc k))))
     imp))
   
-(defn clear-all-images
+(defn close-all-images
   "Clear all images from ImageJ, including memory."
   []
   (ij.IJ/run "Close All" ""))
+(def clear-all-images close-all-images); deprecated
 
 (defn max-z-projection
   "Return a max Z-projection."
@@ -764,6 +765,28 @@
   (ij.IJ/run "Image Sequence..." (str "open=" directory " sort"))
   (ij.IJ/getImage))  
 
- 
-    
+(defn seq-to-imp
+  "Make an image from a sequence. Depth is ignored."
+  [width height depth coll]
+  (let [imp (create-imp :width width :height height :slices depth :type "8-bit")]
+    (dotimes [x width]
+      (dotimes [y height]
+        ;(dotimes [z depth]
+          (set-voxel imp x y 1 (nth coll (+ (* y width) x)))))
+    imp))
+
+(defn zconcat-imps
+  "Concat a collection of imagepluses along the z-axis. (Might be weird with anything other than 2D images)"
+  [imps]
+  (let [imp (create-imp :width (get-width (first imps))
+                        :height (get-height (first imps))
+                        :type (get-type-string (first imps))
+                        :slices (count imps))
+        out-stack ^ij.ImageStack (.getImageStack imp)]
+    (dotimes [k (count imps)]
+      (.setProcessor out-stack
+        ^ij.process.ImageProcessor (.getProcessor (nth imps k))
+        (inc k)))
+    imp))
+        
   

@@ -1,4 +1,4 @@
-(ns funimage.video.ffmpeg
+(ns funimage.video
   (:use [funimage imp]))        
 
 ; This expects that you've made the calls to activate FFMPEG via FIJI
@@ -15,10 +15,15 @@
   (let [listing (.listFiles (java.io.File. directory))]
     (zconcat-imps
       (for [file listing]
-        (open-imp (.getAbsolutePath file))))))
+        (let [imp (open-imp (.getAbsolutePath file))]
+          (ij.IJ/run imp "Hyperstack to Stack" "")
+          (let [conv ^ij.process.ImageConverter. (ij.process.ImageConverter. imp)]            
+            (.convertRGBStackToRGB conv)
+            imp))))))
 
 (defn tga-sequence-to-avi
   "Take a TGA (RAW) sequence as a directory, and make an avi."
   [directory avi-filename]
   (let [imp (open-tga-directory directory)]
     (save-z-as-avi imp avi-filename)))
+
