@@ -28,12 +28,12 @@
   [^Cursor cur]
   (.dec ^net.imglib2.type.numeric.RealType (.get cur)))
 
-(defn cursor-one
+(defn cursor-set-one
   "Set a cursor's value to one."
   [^Cursor cur]
   (.setOne ^net.imglib2.type.numeric.RealType (.get cur)))
 
-(defn cursor-zero
+(defn cursor-set-zero
   "Set a cursor's value to zero."
   [^Cursor cur]
   (.setZero ^net.imglib2.type.numeric.RealType (.get cur)))

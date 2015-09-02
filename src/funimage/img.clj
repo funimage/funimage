@@ -149,7 +149,8 @@ If you have an ImagePlus, then use funimage.conversion"
   (let [sum (atom 0)]
     (walk-imgs
       (fn [^Cursor cur]
-        (swap! sum + (cursor-val cur))))
+        (swap! sum + (cursor-val cur)))
+      img)
     @sum))
 
 #_(defn replace-subimg
