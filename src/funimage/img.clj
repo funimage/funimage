@@ -1,24 +1,9 @@
 ; This is the namespace for imglib2 img's (see imp for ImagePlus)
 (ns funimage.img
+  (:use [funimage.img cursor])
   (:require [clojure.string :as string]
             [clojure.java.io :as io])
-  (:import [java.io File]
-           [ij IJ ImagePlus]
-           [loci.plugins BF]
-           [ij.io FileSaver]
-           [javax.media.j3d Transform3D]
-           [javax.vecmath Vector3f Point3f Quat4f]
-           [ij.gui NewImage Toolbar]
-           [ij.process ImageProcessor ByteProcessor ImageStatistics]
-           
-           [ij.io Opener]
-           ;[io.scif.img ImgOpener]
-           
-           [java.util.concurrent Executors]
-           [java.awt Canvas Graphics]
-           [javax.swing JFrame JMenu JMenuBar JMenuItem]
-           
-           [net.imglib2.algorithm.neighborhood Neighborhood RectangleShape]
+  (:import [net.imglib2.algorithm.neighborhood Neighborhood RectangleShape]
            [net.imglib2.util Intervals]
            [net.imglib2.img ImagePlusAdapter Img]
            [net.imglib2.img.display.imagej ImageJFunctions]
@@ -30,38 +15,100 @@
            [net.imglib2.view Views IntervalView]
            [net.imglib2 Cursor RandomAccess RandomAccessibleInterval Interval]))
 
+
 (defn walk-imgs
-  "Walk all images (as cursors) applying f at each step. 
+   "Walk all images (as cursors) applying f at each step. 
+f is a function that operates on cursors in the same order as imgs
+If you have an ImagePlus, then use funimage.conversion
+Note: this uses threads to avoid some blocking issues."
+   ([f img1]
+     (let [cur1 (.cursor ^Img img1)       
+           t (Thread. 
+               (fn []
+                 (loop []
+                   (when (.hasNext ^Cursor cur1)
+                     (.fwd ^Cursor cur1)
+                     (f cur1)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       [img1]))
+   ([f img1 img2]
+     (let [cur1 (.cursor ^Img img1)
+           cur2 (.cursor ^Img img2)
+           t (Thread. 
+               (fn []
+                 (loop []
+                   (when (and (.hasNext ^Cursor cur1)
+                              (.hasNext ^Cursor cur2))
+                     (.fwd ^Cursor cur1)
+                     (.fwd ^Cursor cur2)
+                     (f cur1 cur2)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       [img1 img2]))
+   ([f img1 img2 & imgs]
+     (let [imgs (concat [img1 img2] imgs)
+           curs (map #(.cursor ^Img %) imgs)
+           t (Thread. 
+               (fn []
+                 (loop []
+                   (when (every? (map #(.hasNext ^Cursor %) curs))                           
+                     (doseq [cur curs] (.fwd ^Cursor cur))
+                     (apply f curs)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       imgs)))
+
+; Nonthreaded version
+#_(defn walk-imgs
+   "Walk all images (as cursors) applying f at each step. 
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion"
-  ([f img1]
-    (let [cur1 (.cursor ^Img img1)]
-      (loop []
-        (when (.hasNext ^Cursor cur1)
-          (.fwd ^Cursor cur1)
-          (f cur1)
-          (recur)))
-      [img1]))
-  ([f img1 img2]
-    (let [cur1 (.cursor ^Img img1)
-          cur2 (.cursor ^Img img2)]
-      (loop []
-        (when (and (.hasNext ^Cursor cur1)
-                   (.hasNext ^Cursor cur2))
-          (.fwd ^Cursor cur1)
-          (.fwd ^Cursor cur2)
-          (f cur1 cur2)
-          (recur)))
-      [img1 img2]))
-  ([f img1 img2 & imgs]
-    (let [imgs (concat [img1 img2] imgs)
-          curs (map #(.cursor ^Img %) imgs)]
-      (loop []
-        (when (every? (map #(.hasNext ^Cursor %) curs))                           
-          (doseq [cur curs] (.fwd ^Cursor cur))
-          (apply f curs)
-          (recur)))
-      imgs)))
+   ([f img1]
+     (let [cur1 (.cursor ^Img img1)]
+       (loop []
+         (when (.hasNext ^Cursor cur1)
+           (.fwd ^Cursor cur1)
+           (f cur1)
+           (recur)))
+       [img1]))
+   ([f img1 img2]
+     (let [cur1 (.cursor ^Img img1)
+           cur2 (.cursor ^Img img2)]
+       (loop []
+         (when (and (.hasNext ^Cursor cur1)
+                    (.hasNext ^Cursor cur2))
+           (.fwd ^Cursor cur1)
+           (.fwd ^Cursor cur2)
+           (f cur1 cur2)
+           (recur)))
+       [img1 img2]))
+   ([f img1 img2 & imgs]
+     (let [imgs (concat [img1 img2] imgs)
+           curs (map #(.cursor ^Img %) imgs)]
+       (loop []
+         (when (every? (map #(.hasNext ^Cursor %) curs))                           
+           (doseq [cur curs] (.fwd ^Cursor cur))
+           (apply f curs)
+           (recur)))
+       imgs)))
+
+#_(do
+   (use 'funimage.imp)
+   (use 'funimage.conversion)
+   (let [imp (convert-to-8bit (open-imp "http://1.bp.blogspot.com/-k4Iy7Imzzcw/U6xrs_XswMI/AAAAAAAAP84/HsKL5OhtMZM/s1600/IMG_7618.jpg"))
+         tmp (atom 0)
+         ag (agent nil)]
+     (println (get-width imp) (get-height imp))
+     (send ag (fn [a]
+                (walk-imgs (fn [^Cursor cur1] (reset! tmp (+ @tmp (cursor-val cur1))))
+                           (imp->img imp))))
+     (await ag)
+     (println @tmp))
+   )
 
 (defn replace-img
   "Replace img1 with img2"
@@ -74,14 +121,14 @@ If you have an ImagePlus, then use funimage.conversion"
   "Subtract the second image from the first (destructive)."
   [img1 img2]
   (first (walk-imgs
-           (fn [^Cursor cur1 ^Cursor cur2] (.sub (.get cur2) (.get cur1)))
+           cursor-sub
            img1 img2)))
 
 (defn elmul-img
   "Subtract the second image from the first (destructive)."
   [img1 img2]
   (first (walk-imgs
-           (fn [^Cursor cur1 ^Cursor cur2] (.mul (.get cur2) (double (.get (.get cur1)))))
+           cursor-mul
            img1 img2)))
 
 (defn threshold-img
@@ -102,7 +149,7 @@ If you have an ImagePlus, then use funimage.conversion"
   (let [sum (atom 0)]
     (walk-imgs
       (fn [^Cursor cur]
-        (swap! sum + (.getRealFloat (.get cur)))))
+        (swap! sum + (cursor-val cur))))
     @sum))
 
 #_(defn replace-subimg
