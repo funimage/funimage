@@ -8,15 +8,23 @@
            [net.imglib2.type NativeType]
            [net.imglib2.type.numeric NumericType ARGBType]
            [net.imglib2.type.numeric.real FloatType]
-           [net.imglib2.algorithm.gauss3 Gauss3]
-           [net.imglib2.algorithm.dog DifferenceOfGaussian]
            [net.imglib2.view Views IntervalView]
            [net.imglib2 Cursor RandomAccess RandomAccessibleInterval Interval]))
     
-(defn cursor-val
+(defn cursor-get-val
   "Get the value of a numeric (RealType) cursor."
   [^Cursor cur]
   (.get ^net.imglib2.type.numeric.RealType (.get cur)))
+
+(defn cursor-set-val
+  "Get the value of a numeric (RealType) cursor."
+  [^Cursor cur val]
+  (.set ^net.imglib2.type.numeric.RealType (.get cur)) val)
+
+(defn cursor-set-byte-val
+  "Get the value of a numeric (RealType) cursor."
+  [^Cursor cur ^long val]
+  (.setInteger ^net.imglib2.type.numeric.integer.GenericByteType (.get cur) val))
 
 (defn cursor-inc
   "Increment the value at a cursor."

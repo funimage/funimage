@@ -65,26 +65,26 @@
       (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getPolygon roi)))
     mask))
 
-(defn color-mask-rois
-  "Make a colored mask of ROIs, expects: [[roi1 color1], [roi2 color2], ...]"
+#_(defn color-mask-rois
+   "Make a colored mask of ROIs, expects: [[roi1 color1], [roi2 color2], ...]"
+   [imp rois colors]
+   (let [mask (create-imp-like imp)]
+     (.setSnapshotCopyMode (.getProcessor mask) false)
+     (dotimes [k (count rois)]      
+       (set-roi mask (nth rois k))      
+       (set-fill-value mask (nth colors k))
+       (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getPolygon (nth rois k))))
+     mask))
+
+(defn fill-rois
+  "Fill ROIs, colors should by the same format as imp, which probably has to be single channel at the moment."
   [imp rois colors]
   (let [mask (create-imp-like imp)]
     (.setSnapshotCopyMode (.getProcessor mask) false)
     (dotimes [k (count rois)]      
-      (set-roi mask (nth rois k))      
-      (set-fill-value mask (nth colors k))
-      (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getPolygon (nth rois k))))
+      (.setColor ^ij.process.ImageProcessor (.getProcessor mask) (nth colors k))
+      (.fill ^ij.process.ImageProcessor (.getProcessor mask) ^ij.gui.Roi (nth rois k)))
     mask))
 
-#_(let [filename "hello-communist-kitty_bw.tif"
-       imp (open-imp filename)
-       patch-width 50 patch-height 50
-       w (get-width imp) h (get-height imp)
-       rois (for [x (range 0 w patch-width)
-                  y (range 0 w patch-height)]
-              (rectangle-roi x y patch-width patch-height))
-       colors (repeatedly (count rois) #(rand-int 255))
-       patched-imp (color-mask-rois imp rois colors)]
-   (show-imp imp)
-   (show-imp patched-imp))
+
   

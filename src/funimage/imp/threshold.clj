@@ -60,7 +60,10 @@
         (= method-name :yen) (Auto_Threshold/Yen data)))    
 
 (defn autothreshold
-  "Autotheshold an imageplus with the supplied method."
+  "Autotheshold an imageplus with the supplied method.
+Valid method names:
+:IJ-default, :huang, :intermodes, :iso-data, :li, :max-entropy, :mean, :min-error-i, :minimum, :moments, :otsu, :percentile, :renyi-entropy, :shanbhag, :triangle, :yen
+This list is programmatically accessible as: funimage.imp.threshold/threshold-methods"
   [^ImagePlus imp method-name noWhite noBlack doIwhite doIset doIlog doIstackHistogram]
   (when (and (not (nil? imp)) 
              (thresholdable-imp? imp))

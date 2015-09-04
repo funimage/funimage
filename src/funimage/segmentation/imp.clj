@@ -91,29 +91,7 @@
       (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/particles.tif"))
       (IJ/getImage)))
 
-(defn imp-to-segments
-   "Get the segments from an imp (kidney meca specialized)."
-   [imp]
-   ;(let [imp (first (split-channels imp))]
-     (.setSnapshotCopyMode (.getProcessor imp) false)
-     (IJ/run imp "Invert" "");
-     ;(IJ/run imp "Auto Threshold" "method=Otsu white");
-     (autothreshold imp :otsu false false true false false false)     
-     (let [prev-title (.getTitle imp)]
-       (IJ/run imp "Analyze Particles..." "size=8000-Infinity display clear add");
-       (let [min-size 4000 ; was 2000
-             roi-manager (get-roi-manager)
-             particle-imp (create-imp-like imp)]
-         (.setSnapshotCopyMode (.getProcessor particle-imp) false)
-         (set-fill-value particle-imp 255)
-         (doseq [roi (.getRoisAsArray roi-manager)]
-           (let [bounds (.getBounds roi)]
-             (.fillPolygon ^ij.process.ImageProcessor (.getProcessor particle-imp) ^java.awt.Polygon (.getPolygon roi))
-             #_(when (> (* (.getWidth bounds) (.getHeight bounds)) min-size); from ASN
-                #_(set-roi particle-imp roi)
-                (.fillPolygon ^ij.process.ImageProcessor (.getProcessor particle-imp) ^java.awt.Polygon (.getPolygon roi))
-                #_(fill particle-imp))))
-         particle-imp)))
+
 
 #_(defn kmeans-clustering
    "K-means clustering on the results table."

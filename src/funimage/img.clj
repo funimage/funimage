@@ -96,20 +96,6 @@ If you have an ImagePlus, then use funimage.conversion"
            (recur)))
        imgs)))
 
-#_(do
-   (use 'funimage.imp)
-   (use 'funimage.conversion)
-   (let [imp (convert-to-8bit (open-imp "http://1.bp.blogspot.com/-k4Iy7Imzzcw/U6xrs_XswMI/AAAAAAAAP84/HsKL5OhtMZM/s1600/IMG_7618.jpg"))
-         tmp (atom 0)
-         ag (agent nil)]
-     (println (get-width imp) (get-height imp))
-     (send ag (fn [a]
-                (walk-imgs (fn [^Cursor cur1] (reset! tmp (+ @tmp (cursor-val cur1))))
-                           (imp->img imp))))
-     (await ag)
-     (println @tmp))
-   )
-
 (defn replace-img
   "Replace img1 with img2"
   [img1 img2]
@@ -149,7 +135,7 @@ If you have an ImagePlus, then use funimage.conversion"
   (let [sum (atom 0)]
     (walk-imgs
       (fn [^Cursor cur]
-        (swap! sum + (cursor-val cur)))
+        (swap! sum + (cursor-get-val cur)))
       img)
     @sum))
 
@@ -221,6 +207,28 @@ Rectangle only"
           (f center local-neighborhood)))
       dest)))
 
+#_(do (use 'funimage.imp) (use 'funimage.conversion)
+(require '[clojure.reflect :as r])
+(use 'clojure.pprint)
+(set! *warn-on-reflection* true)
+;(print-table (:members (r/reflect net.imglib2.type.numeric.integer.UnsignedByteType)))
+(let [imp (convert-to-8bit (open-imp "http://orig15.deviantart.net/bd63/f/2011/276/a/a/baby_kangaroo_mouse_by_ilovelost456-d4bp43l.jpg"))
+      img (imp->img imp)
+      out-imp (create-imp-like imp)
+      out-img (imp->img out-imp)
+      res (neighborhood-walk-img-to-center 
+            (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
+              #_(println (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (.get val))
+                                                                    nhood)))
+              (cursor-set-byte-val cur ^long (long (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (int (.get val)))
+                                                                       nhood))))
+              #_(cursor-set-byte-val cur ^long (long (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (int (.get ^net.imglib2.type.numeric.RealType val)))
+                                                                   nhood))))
+              #_(cursor-set-val cur (int (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (int (.get val)))
+                                                        nhood)))))
+            1 img out-img)]
+  (show-imp imp)
+  (show-imp (img->imp res))))
 
 #_(defn mean-filter-nonzero
     "Mean filter with imglib2 with a square kernel"
