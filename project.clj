@@ -1,4 +1,4 @@
-(defproject funimage/funimage "0.1.69"
+(defproject funimage/funimage "0.1.70"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -18,7 +18,7 @@
                  [net.imglib2/imglib2-ij "2.0.0-beta-31"];[net.imglib2/imglib2-ij "2.0.0-beta-28"]
                  [net.imglib2/imglib2-ops "2.0.0-beta-26"]
                  
-                 ;[net.imagej/imagej-ops "0.18.1-SNAPSHOT"]
+                 ;[net.imagej/imagej-ops "0.18.1-SNAPSHOT"]; currently needed for funimage.img.skeleton
 
                  [org.scijava/scijava-common "2.46.0"]
                  

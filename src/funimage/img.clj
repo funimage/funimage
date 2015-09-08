@@ -13,7 +13,9 @@
            [net.imglib2.algorithm.gauss3 Gauss3]
            [net.imglib2.algorithm.dog DifferenceOfGaussian]
            [net.imglib2.view Views IntervalView]
-           [net.imglib2 Cursor RandomAccess RandomAccessibleInterval Interval]))
+           [net.imglib2 Cursor RandomAccess RandomAccessibleInterval Interval]
+           [net.imglib2.algorithm.binary Thresholder]
+           ))
 
 
 (defn map-imgs
@@ -117,17 +119,25 @@ If you have an ImagePlus, then use funimage.conversion"
            cursor-mul
            img1 img2)))
 
-(defn threshold-img
-  "Convert an image into a binary one about a threshold."
-  ([img threshold]
-    (threshold-img img threshold 0 255))
-  ([img threshold low high]
-    (let [f-min (float low)
-          f-max (float high)]
-      (first (map-imgs
-               (fn [^Cursor cur] (.set (.get cur) 
-                                   (if (> (.getRealFloat (.get cur)) threshold) f-max f-min)))
-               img)))))
+#_(defn threshold-img
+   "Convert an image into a binary one about a threshold."
+   ([img threshold]
+     (threshold-img img threshold 0 255))
+   ([img threshold low high]
+     (let [f-min (float low)
+           f-max (float high)]
+       (first (map-imgs
+                (fn [^Cursor cur] (.set (.get cur) 
+                                    (if (> (.getRealFloat (.get cur)) threshold) f-max f-min)))
+                img)))))
+
+(defn threshold-img 
+  "Binarize an image about a threshold"
+  [img threshold]
+  (Thresholder/threshold img 
+                         (net.imglib2.type.numeric.integer.UnsignedByteType. threshold); Could cond check this 
+                         true
+                         1))
 
 (defn sum-img
   "Take the sum of all pixel values in an image."
@@ -168,7 +178,7 @@ If you have an ImagePlus, then use funimage.conversion"
 (bx,by,bz) - 'bottom' point. these are the small values. exclusive
 (tx,ty,tz) - 'top' point. these are the big values. exclusive
 locations outside these points are assigned fill-value"
-  [img bx by bz tx ty tz fill-value]
+  [img bx by bz tx ty tz fill-value]; should take array of locations to generalize to N-D
   (let [location (float-array [0 0 0])
         f-fv (float fill-value)]
     (first (map-imgs
@@ -179,19 +189,7 @@ locations outside these points are assigned fill-value"
                  (.set (.get cur) 
                    f-fv)))
              img))))
- 
-#_(defn neighborhood-map-img
-   "Do a neighborhood walk over an imglib2 img.
-Rectangle only"
-   ([f radius img]
-     (let [interval ^Interval (Intervals/expand img (* -1 radius))
-           source ^RandomAccessibleInterval (Views/interval img interval)
-           center ^Cursor (.cursor (Views/iterable source))
-           shape ^RectangleShape (RectangleShape. radius true)]
-       (doseq [^Neighborhood local-neighborhood (.neighborhoods shape source)] 
-         (do (.next center)
-           (f center local-neighborhood)))
-       img)))
+
 
 (defn neighborhood-map-img-to-center
   "Do a neighborhood walk over an imglib2 img.
@@ -207,76 +205,3 @@ Rectangle only"
           (f center local-neighborhood)))
       dest)))
 
-#_(do (use 'funimage.imp) (use 'funimage.conversion)
-(require '[clojure.reflect :as r])
-(use 'clojure.pprint)
-(set! *warn-on-reflection* true)
-;(print-table (:members (r/reflect net.imglib2.type.numeric.integer.UnsignedByteType)))
-(let [imp (convert-to-8bit (open-imp "http://orig15.deviantart.net/bd63/f/2011/276/a/a/baby_kangaroo_mouse_by_ilovelost456-d4bp43l.jpg"))
-      img (imp->img imp)
-      out-imp (create-imp-like imp)
-      out-img (imp->img out-imp)
-      res (neighborhood-map-img-to-center 
-            (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
-              #_(println (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (.get val))
-                                                                    nhood)))
-              (cursor-set-byte-val cur ^long (long (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (int (.get val)))
-                                                                       nhood))))
-              #_(cursor-set-byte-val cur ^long (long (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (int (.get ^net.imglib2.type.numeric.RealType val)))
-                                                                   nhood))))
-              #_(cursor-set-val cur (int (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (int (.get val)))
-                                                        nhood)))))
-            1 img out-img)]
-  (show-imp imp)
-  (show-imp (img->imp res))))
-
-#_(defn mean-filter-nonzero
-    "Mean filter with imglib2 with a square kernel"
-    [imp radius]
-    (let [nhood-size (* radius radius)]
-      (img->imp
-        (neighborhood-map-img-to-center 
-                         (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
-                           (.set ^net.imglib2.type.numeric.real.FloatType (.get cur)
-                             (float (let [pxs (filter #(not (zero? %)) (map #(.get ^net.imglib2.type.numeric.real.FloatType %) nhood))]
-                                      (if (empty? pxs) 0
-                                        (/ (apply + pxs)
-                                           (count pxs)))))))
-                         radius
-                         (imp->img imp) (imp->img (create-imp :title (str "closest angle")
-                                                              :type "32-bit"
-                                                              :width (get-width imp)
-                                                              :height (get-height imp)))))))
-
-#_(defn median-filter-nonzero
-     "Median filter with imglib2 with a square kernel"
-     [imp radius]
-     (let [nhood-size (* radius radius)]
-       (img->imp
-         (neighborhood-map-img-to-center 
-                          (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
-                            (.set ^net.imglib2.type.numeric.real.FloatType (.get cur)
-                              (float (let [pxs (filter #(not (zero? %)) (map #(.get ^net.imglib2.type.numeric.real.FloatType %) nhood))]
-                                       (if (empty? pxs) 0
-                                         (nth pxs (int (/ (count pxs) 2))))))))
-                          radius
-                          (imp->img imp) (imp->img (create-imp :title (str "closest angle")
-                                                               :type "32-bit"
-                                                               :width (get-width imp)
-                                                               :height (get-height imp)))))))
-
-#_(defn variance-filter-nonzero
-      "Median filter with imglib2 with a square kernel"
-      [imp radius]
-      (let [nhood-size (* radius radius)]
-        (img->imp
-          (neighborhood-map-img-to-center 
-                           (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
-                             (.set ^net.imglib2.type.numeric.real.FloatType (.get cur)
-                               (float (let [pxs (filter #(not (zero? %)) (map #(.get ^net.imglib2.type.numeric.real.FloatType %) nhood))]
-                                        (if (empty? pxs) 0 (/ (+ (apply min pxs) (apply max pxs)) 2))))))
-                           radius
-                           (imp->img imp) (imp->img (create-imp :title (str "closest angle")
-                                                                :type "32-bit"
-                                                                :width (get-width imp)
-                                                                :height (get-height imp)))))))
