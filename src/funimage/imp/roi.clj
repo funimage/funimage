@@ -86,5 +86,18 @@
       (.fill ^ij.process.ImageProcessor (.getProcessor mask) ^ij.gui.Roi (nth rois k)))
     mask))
 
+(defn rois-angle
+  "Get the angles of each ROI."
+  [rois]
+  (doall (map #(.getAngle ^ij.gui.Roi %) rois)))
 
+(defn rois-ferets-diameter
+  "Return Feret's diameter for each ROI. This is the greatest distance between any 2 points along the perimeter/ROI boundary."
+  [rois]
+  (doall (map #(.getFeretsDiameter ^ij.gui.Roi %) rois)))
+
+(defn rois-perimeter-length
+  "Return the perimeter length of each ROI."
+  [rois]
+  (doall (map #(.getLength ^ij.gui.Roi %) rois)))
   

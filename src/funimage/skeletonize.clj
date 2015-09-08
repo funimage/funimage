@@ -3,35 +3,29 @@
             [clojure.java.io :as io])
   (:import [java.io File]
            [ij IJ ImagePlus ImageStack]
-           [loci.plugins BF]
            [ij.io FileSaver]
            [javax.media.j3d Transform3D]
            [javax.vecmath Vector3f Point3f Quat4f]
            [ij.gui NewImage Toolbar]
-           [ij.process ImageProcessor ByteProcessor ImageStatistics]
-           
-           [ij.io Opener]
-           ;[io.scif.img ImgOpener]
-           
-           [java.util.concurrent Executors]
-           [java.awt Canvas Graphics]
-           [javax.swing JFrame JMenu JMenuBar JMenuItem]
-           
-           [net.imglib2.img ImagePlusAdapter Img]
-           [net.imglib2.img.display.imagej ImageJFunctions]
-           [net.imglib2.type NativeType]
-           [net.imglib2.type.numeric NumericType ARGBType]
-           [net.imglib2.type.numeric.real FloatType]
-           [net.imglib2.algorithm.gauss3 Gauss3]
-           [net.imglib2.algorithm.dog DifferenceOfGaussian]
-           [net.imglib2.view Views IntervalView]
-           [net.imglib2 Cursor RandomAccess]
-           [skeleton_analysis AnalyzeSkeleton_])
+           [ij.process ImageProcessor ByteProcessor ImageStatistics])           
   (:use [funimage imp]))
 
-(defn skeletonize
-  "Skeletonize an imageplus"
+#_(defn skeletonize-3d
+   "Skeletonize an imageplus"
+   [imp]
+   (let [inst (AnalyzeSkeleton_.)]
+     (.setup inst "" imp)
+     (.run inst (.getProcessor imp))))
+
+(defn skeletonize-2d
+  "Skeletonize a 2D binary image."
   [imp]
-  (let [inst (AnalyzeSkeleton_.)]
-    (.setup "" imp)
-    (.run inst (.getProcessor imp))))
+  (let [plugin (ij.plugin.filter.Binary.)]
+    (.setup plugin "skeletonize" imp)
+    (.skeletonize plugin))); ^ij.process.ImageProcessor (.getProcessor imp))))
+        
+
+#_(do (require '[clojure.reflect :as r])
+   (use 'clojure.pprint)
+   (print-table (:members (r/reflect ij.plugin.filter.Binary))))
+
