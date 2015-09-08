@@ -16,7 +16,7 @@
            [net.imglib2 Cursor RandomAccess RandomAccessibleInterval Interval]))
 
 
-(defn walk-imgs
+(defn map-imgs
    "Walk all images (as cursors) applying f at each step. 
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion
@@ -63,7 +63,7 @@ Note: this uses threads to avoid some blocking issues."
        imgs)))
 
 ; Nonthreaded version
-#_(defn walk-imgs
+#_(defn map-imgs
    "Walk all images (as cursors) applying f at each step. 
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion"
@@ -99,21 +99,21 @@ If you have an ImagePlus, then use funimage.conversion"
 (defn replace-img
   "Replace img1 with img2"
   [img1 img2]
-  (second (walk-imgs 
+  (second (map-imgs 
             (fn [^Cursor cur1 ^Cursor cur2] (.set (.get cur2) (.get cur1)))
             img2 img1)))
     
 (defn subtract-img
   "Subtract the second image from the first (destructive)."
   [img1 img2]
-  (first (walk-imgs
+  (first (map-imgs
            cursor-sub
            img1 img2)))
 
 (defn elmul-img
   "Subtract the second image from the first (destructive)."
   [img1 img2]
-  (first (walk-imgs
+  (first (map-imgs
            cursor-mul
            img1 img2)))
 
@@ -124,7 +124,7 @@ If you have an ImagePlus, then use funimage.conversion"
   ([img threshold low high]
     (let [f-min (float low)
           f-max (float high)]
-      (first (walk-imgs
+      (first (map-imgs
                (fn [^Cursor cur] (.set (.get cur) 
                                    (if (> (.getRealFloat (.get cur)) threshold) f-max f-min)))
                img)))))
@@ -133,7 +133,7 @@ If you have an ImagePlus, then use funimage.conversion"
   "Take the sum of all pixel values in an image."
   [img]
   (let [sum (atom 0)]
-    (walk-imgs
+    (map-imgs
       (fn [^Cursor cur]
         (swap! sum + (cursor-get-val cur)))
       img)
@@ -171,7 +171,7 @@ locations outside these points are assigned fill-value"
   [img bx by bz tx ty tz fill-value]
   (let [location (float-array [0 0 0])
         f-fv (float fill-value)]
-    (first (walk-imgs
+    (first (map-imgs
              (fn [^Cursor cur]               
                (.localize cur location)
                (when (or (< (first location) bx) (< (second location) by) (< (last location) bz)
@@ -180,7 +180,7 @@ locations outside these points are assigned fill-value"
                    f-fv)))
              img))))
  
-#_(defn neighborhood-walk-img
+#_(defn neighborhood-map-img
    "Do a neighborhood walk over an imglib2 img.
 Rectangle only"
    ([f radius img]
@@ -193,7 +193,7 @@ Rectangle only"
            (f center local-neighborhood)))
        img)))
 
-(defn neighborhood-walk-img-to-center
+(defn neighborhood-map-img-to-center
   "Do a neighborhood walk over an imglib2 img.
 Rectangle only"
   ([f radius source dest]
@@ -216,7 +216,7 @@ Rectangle only"
       img (imp->img imp)
       out-imp (create-imp-like imp)
       out-img (imp->img out-imp)
-      res (neighborhood-walk-img-to-center 
+      res (neighborhood-map-img-to-center 
             (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
               #_(println (apply max (map (fn [^net.imglib2.type.numeric.RealType val] (.get val))
                                                                     nhood)))
@@ -235,7 +235,7 @@ Rectangle only"
     [imp radius]
     (let [nhood-size (* radius radius)]
       (img->imp
-        (neighborhood-walk-img-to-center 
+        (neighborhood-map-img-to-center 
                          (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
                            (.set ^net.imglib2.type.numeric.real.FloatType (.get cur)
                              (float (let [pxs (filter #(not (zero? %)) (map #(.get ^net.imglib2.type.numeric.real.FloatType %) nhood))]
@@ -253,7 +253,7 @@ Rectangle only"
      [imp radius]
      (let [nhood-size (* radius radius)]
        (img->imp
-         (neighborhood-walk-img-to-center 
+         (neighborhood-map-img-to-center 
                           (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
                             (.set ^net.imglib2.type.numeric.real.FloatType (.get cur)
                               (float (let [pxs (filter #(not (zero? %)) (map #(.get ^net.imglib2.type.numeric.real.FloatType %) nhood))]
@@ -270,7 +270,7 @@ Rectangle only"
       [imp radius]
       (let [nhood-size (* radius radius)]
         (img->imp
-          (neighborhood-walk-img-to-center 
+          (neighborhood-map-img-to-center 
                            (fn [^net.imglib2.Cursor cur ^net.imglib2.algorithm.neighborhood.Neighborhood nhood]
                              (.set ^net.imglib2.type.numeric.real.FloatType (.get cur)
                                (float (let [pxs (filter #(not (zero? %)) (map #(.get ^net.imglib2.type.numeric.real.FloatType %) nhood))]

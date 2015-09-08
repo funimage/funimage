@@ -17,7 +17,8 @@
                  [net.imglib2/imglib2-algorithm "0.3.1"];[net.imglib2/imglib2-algorithm "0.2.1"]
                  [net.imglib2/imglib2-ij "2.0.0-beta-31"];[net.imglib2/imglib2-ij "2.0.0-beta-28"]
                  [net.imglib2/imglib2-ops "2.0.0-beta-26"]
-                 ;[net.imglib2/imglib2-ops "0.18.1-SNAPSHOT"]
+                 
+                 ;[net.imagej/imagej-ops "0.18.1-SNAPSHOT"]
 
                  [org.scijava/scijava-common "2.46.0"]
                  
