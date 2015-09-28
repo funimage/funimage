@@ -16,7 +16,8 @@
            ))
 
 (defn skeletonize
-  "Skeletonize/thin an image."
+  "Skeletonize/thin an image. 
+Algorithms: :morphological, :guo-hall, :hilditch, :zhang-suen"
   [img & args]
   (let [argmap (merge {:algorithm :morphological} (apply hash-map args) )
         ^net.imagej.ops.thinning.strategies.ThinningStrategy thinning-algo

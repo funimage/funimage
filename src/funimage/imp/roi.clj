@@ -86,18 +86,52 @@
       (.fill ^ij.process.ImageProcessor (.getProcessor mask) ^ij.gui.Roi (nth rois k)))
     mask))
 
+(defn roi-angle
+  "Get the angle of a ROI."
+  [^ij.gui.Roi roi]
+  (.getAngle roi))
+
 (defn rois-angle
   "Get the angles of each ROI."
   [rois]
-  (doall (map #(.getAngle ^ij.gui.Roi %) rois)))
+  (doall (map roi-angle rois)))
+
+(defn roi-ferets-diameter
+  "Return Feret's diameter for each ROI. This is the greatest distance between any 2 points along the perimeter/ROI boundary."
+  [^ij.gui.Roi roi]
+  (.getFeretsDiameter  roi))
 
 (defn rois-ferets-diameter
   "Return Feret's diameter for each ROI. This is the greatest distance between any 2 points along the perimeter/ROI boundary."
   [rois]
-  (doall (map #(.getFeretsDiameter ^ij.gui.Roi %) rois)))
+  (doall (map roi-feret-diameter rois)))
+
+(defn roi-perimeter-length
+  "Return the perimeter length of each ROI."
+  [^ij.gui.Roi roi]
+  (.getLength ^ij.gui.Roi roi))
 
 (defn rois-perimeter-length
   "Return the perimeter length of each ROI."
   [rois]
-  (doall (map #(.getLength ^ij.gui.Roi %) rois)))
+  (doall (map roi-perimeter-length rois)))
   
+(defn roi-area
+  "Compute the area of an roi using an integer grid + tally mechanism."
+  [roi]
+  (let [poly (.getFloatPolygon roi)
+        min-x (apply min (.xpoints poly))
+        max-x (apply max (.xpoints poly))
+        min-y (apply min (.ypoints poly))
+        max-y (apply max (.ypoints poly))]        
+    (loop [x min-x
+           y min-y
+           tally 0]
+      (cond (and (> x max-x)
+                 (> y max-y)); finish at end of region
+            tally
+            (> x max-x); line wrap
+            (recur min-x (inc y) tally)
+            :else
+            (recur (inc x) y 
+                   (if (.contains poly x y) (inc tally) tally))))))

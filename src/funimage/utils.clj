@@ -29,7 +29,7 @@
 (defn get-image-histogram
   "Display and return the histogram of an image."
   [img]
-  (let [hw (HistogramWindow. (.getImagePlus img))]
+  (let [hw (HistogramWindow. img)]
     (.show hw)
     hw))
 

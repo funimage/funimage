@@ -282,7 +282,7 @@
 (defn get-pixel-float
   "Return a pixel's value as a float."
   [^ImagePlus imp x y]
-  (.getf imp x y))
+  (.getf ^ImageProcessor (.getProcessor imp) x y))
 
 (defn get-num-channels
   "Return the number of channels in an ImagePlus."
@@ -691,6 +691,16 @@
   (when (.isVisible imp)
 		(.updateAndRepaintWindow imp))
   imp)
+
+(defn set-lut
+  "Set the lookup table (LUT) for color coding this image."
+  [^ImagePlus imp ^ij.process.LUT lut]
+  (.setLut imp lut))
+
+(defn create-lut
+  "Make a lookup table from an image."
+  [^ImagePlus imp]
+  ^ij.process.LUT (.createLut imp))
   
 (defn set-title
   "Set the title of an imageplus."

@@ -15,7 +15,7 @@ Note to functional programming folks, funimage is *destructive* by default. Imag
 Citing:
 
 Functional Image Processing with ImageJ/FIJI
-K. Harrington, T. Stiles, L. Venkatraman, K. Bentley
+K. Harrington, T. Stiles, L. Venkatraman, C.Prahst, K. Bentley
 Proceedings of Bioimage Informatics, 2015, (accepted).
 
 =========
