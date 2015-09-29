@@ -104,7 +104,7 @@
 (defn rois-ferets-diameter
   "Return Feret's diameter for each ROI. This is the greatest distance between any 2 points along the perimeter/ROI boundary."
   [rois]
-  (doall (map roi-feret-diameter rois)))
+  (doall (map roi-ferets-diameter rois)))
 
 (defn roi-perimeter-length
   "Return the perimeter length of each ROI."

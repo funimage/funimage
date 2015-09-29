@@ -10,6 +10,14 @@ Functional Image Processing with ImageJ/FIJI
 
 Note to functional programming folks, funimage is *destructive* by default. Images are large and take up lots of memory, we try not to duplicate data unless necessary. If you want to do something non-destructively, then you need to explicitly use functions like copy-imp.
 
+========
+
+#Usage within ImageJ:
+
+Add an update site like you would usually (see http://fiji.sc/List_of_update_sites)   
+
+where the update site is: http://sites.imagej.net/Funimage/  
+
 =========
 
 Citing:
