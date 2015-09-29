@@ -30,13 +30,19 @@
            [net.imglib2 Cursor RandomAccess]))
 
 (defn image-calculator-fn
-  "Image calculator function from string."
-  [function-name create? stack? float?]
-  #(let [ic (ImageCalculator.)
-         result (.run ic (string/join " " (filter identity [function-name (when create? "create") (when float? "32-bit") (when stack? "stack")])) %1 %2)]     
-     (if create?
-       result
-       %1)))
+   "Image calculator function from string."
+   [function-name create? stack? float?]
+   (let [binary-fn (fn [imp1 imp2]
+                     (let [ic (ImageCalculator.)
+                           result (.run ic (string/join " " (filter identity [function-name (when create? "create") (when float? "32-bit") (when stack? "stack")])) imp1 imp2)]     
+                       (if create?
+                         result
+                         imp1)))]
+     (fn [imp1 imp2 & imps]
+       (if (empty? imps)
+         (binary-fn imp1 imp2)
+         (recur (binary-fn imp1 imp2) (first imps) (rest imps))))))
+
 
 (def imp-add "Add 2 image pluses. img1 = img1+img2" (image-calculator-fn "Add" false true false))
 (def imp-subtract "Subtract 2 image pluses. img1 = img1-img2" (image-calculator-fn "Subtract" false true false))
