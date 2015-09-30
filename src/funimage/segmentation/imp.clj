@@ -13,22 +13,38 @@
           [java.awt.event ActionListener]
           [java.io File]))
 
+; (with-measurements m & body)
+
 (defn analyze-particles
   "Use the ImageJ particle analyzer."
   [imp & args]
   (let [argmap (apply hash-map args)
         min-size (or (:min-size argmap) 0)
         max-size (or (:max-size argmap) "Infinity")
-        return-mask? (or (:return-mask argmap) false)]
+        ;return-mask? (or (:return-mask argmap) false)        
+        result-type (or (:return-type argmap) :original) ; :original, :mask, :labeled        
+        method-args (str (when (or (:clear-results argmap) false) " clear")
+                         (when (or (:display-results argmap) false) " display")
+                         (when (or (:add-results argmap) false) " add"))
+        ]
     ;(println "Analyze particles arguments: " (str "size=" min-size "-" max-size " display clear add"))
-    (IJ/run imp "Analyze Particles..." (str "size=" min-size "-" max-size " display clear add"))
-    (cond return-mask?
+    (IJ/run imp "Analyze Particles..." (str "size=" min-size "-" max-size method-args #_" display clear add"))
+    (cond (= result-type :mask)
           (let [rois (get-rois)
-                mask (create-imp-like imp)]
-            (set-fill-value mask 255)
+                mask (create-imp-like imp)]            
             (doseq [roi rois]
+              (set-fill-value mask 255)
               (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getPolygon roi)))
             (imp-and mask imp))
+          (= result-type :labeled)
+          (let [rois (get-rois)
+                mask (create-imp-like imp)]            
+            ;(doseq [roi rois]
+            (dotimes [k (count rois)]
+              (let [roi (nth rois k)]
+                (set-fill-value mask k)
+                (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getPolygon roi))))
+            mask)
           :else imp)))
 
 #_(defn size-filter-stack
@@ -91,58 +107,6 @@
       (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/particles.tif"))
       (IJ/getImage)))
 
-
-
-#_(defn kmeans-clustering
-   "K-means clustering on the results table."
-   [result-table num-clusters]
-   (let [clusterer (SimpleKMeans.)
-         ignore-headings ["X" "Y" "XM" "YM" "FeretX" "FeretY"]
-         header (filter #(when-not (some #{%} ignore-headings) %) (.getHeadings result-table))
-         attributes (map #(Attribute. %) header)
-         instances (Instances. "Particles" (java.util.ArrayList. attributes) 0)]
-     (IJ/log "Clustering with features: ")
-     (doseq [h header] (IJ/log h))
-     (.setNumClusters clusterer num-clusters)
-     (.setPreserveInstancesOrder clusterer true)
-     (dotimes [row-idx (.size result-table)]
-       (let [inst (DenseInstance. (count header))]
-         (dotimes [col-idx (count header)]
-			       (.setValue inst (nth attributes col-idx)
-				       (.getValue result-table (nth header col-idx) (int row-idx))))
-		     (.add instances inst)))
-	   (.buildClusterer clusterer instances)
-	   (let [cluster-labels (.getAssignments clusterer)]
-		   (dotimes [row-idx (.size result-table)]
-			   (.setValue result-table "Cluster" row-idx (double (nth cluster-labels row-idx))))))); Should give unique names
-
-#_(defn kmeans-clustering
-     "K-means clustering on the results table."
-     ([result-table num-clusters]
-       (let [ignore-headings ["X" "Y" "XM" "YM" "FeretX" "FeretY"]
-             header (filter #(when-not (some #{%} ignore-headings) %) (.getHeadings result-table))]
-         (kmeans-clustering result-table num-clusters header)))
-     ([result-table num-clusters header]
-       (let [clusterer (SimpleKMeans.)         
-             attributes (map #(Attribute. %) header)
-             instances (Instances. "Particles" (java.util.ArrayList. attributes) 0)
-             column-name (str (gensym "cluster"))]
-         (IJ/log "Clustering with features: ")
-         (doseq [h header] (IJ/log h))
-         (.setNumClusters clusterer num-clusters)
-         (.setPreserveInstancesOrder clusterer true)
-         (dotimes [row-idx #_(.size result-table) (.getCounter result-table)]
-           (let [inst (DenseInstance. (count header))]
-             (dotimes [col-idx (count header)]
-			           (.setValue inst (nth attributes col-idx)
-				           (.getValue result-table (nth header col-idx) (int row-idx))))
-		         (.add instances inst)))
-	       (.buildClusterer clusterer instances)
-	       (let [cluster-labels (.getAssignments clusterer)]
-		       (dotimes [row-idx #_(.size result-table) (.getCounter result-table)]
-			       (.setValue result-table column-name row-idx (double (nth cluster-labels row-idx)))))
-        column-name)))
-
 (defn segment-attribute-histogram
   "Get a histogram for a given attribute of all segments."
   ([result-table measure]
@@ -202,7 +166,7 @@
      (concat (drop shift hist) (take shift hist))))
          
 (defn segment-attribute-color-coding
-  "Color code segments by an attribute."
+  "Color code segments by an attribute. Requires BAR plugin. Consider using segment-attribute-imp with a LUT"
   [measure imp lut]; Round, Angle
   (IJ/selectWindow (.getTitle imp) #_"particles.tif")
   (let [minval 0

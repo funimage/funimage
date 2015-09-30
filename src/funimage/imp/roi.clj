@@ -116,10 +116,35 @@
   [rois]
   (doall (map roi-perimeter-length rois)))
   
-(defn roi-area
+(defn poly-area
+  "Return the area of a polygon."
+  [^java.awt.Polygon poly]
+  (let [min-x (apply min (.xpoints poly))
+        max-x (apply max (.xpoints poly))
+        min-y (apply min (.ypoints poly))
+        max-y (apply max (.ypoints poly))]        
+    (loop [x min-x
+           y min-y
+           tally 0]
+      (cond (and (> x max-x)
+                 (> y max-y)); finish at end of region
+            tally
+            (> x max-x); line wrap
+            (recur min-x (inc y) tally)
+            :else
+            (recur (inc x) y 
+                   (if (.contains poly x y) (inc tally) tally))))))
+
+#_(defn roi-area
+    "Compute the area of an roi using an integer grid + tally mechanism."
+    [roi]
+    (let [poly (.getFloatPolygon roi)]
+      (poly-area poly)))
+
+#_(defn roi-area
   "Compute the area of an roi using an integer grid + tally mechanism."
   [roi]
-  (let [poly (.getFloatPolygon roi)
+  (let [poly ^ij.process.FloatPolygon (.getFloatPolygon roi)
         min-x (apply min (.xpoints poly))
         max-x (apply max (.xpoints poly))
         min-y (apply min (.ypoints poly))
@@ -135,3 +160,21 @@
             :else
             (recur (inc x) y 
                    (if (.contains poly x y) (inc tally) tally))))))
+
+(defn roi-area
+  "Compute the area of an roi using an integer grid + tally mechanism."
+  [roi]
+  (let [poly ^ij.process.FloatPolygon (.getFloatPolygon roi)
+        min-x (apply min (.xpoints poly))
+        max-x (apply max (.xpoints poly))
+        min-y (apply min (.ypoints poly))
+        max-y (apply max (.ypoints poly))
+        
+        xpoints (.xpoints poly)
+        ypoints (.ypoints poly)]
+    
+    (/ (apply + (map (fn [x1 y2 y1 x2]
+                       (- (* x1 y2) (* y1 x2)))
+                     xpoints (concat (rest ypoints) [(first ypoints)])
+                     ypoints (concat (rest xpoints) [(first xpoints)])))
+       2)))

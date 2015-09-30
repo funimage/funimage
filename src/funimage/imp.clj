@@ -715,6 +715,7 @@
         min-size (or (:min-size argmap) 0)
         max-size (or (:max-size argmap) "Infinity")
         max-size (if (string? max-size) java.lang.Integer/MAX_VALUE max-size)
+        label-segments? (or (:label-segments argmap) false); If true, each segment gets a unique intensity value 
         return-mask? true
         rois (atom [])
         stack ^ij.ImageStack (.getImageStack imp)]
@@ -723,14 +724,17 @@
             w ^ij.gui.Wand (ij.gui.Wand. ip)]
         (doall (for [x (range (get-width imp)) y (range (get-height imp))]
                  (when (> (.getPixel ip x y) 0)
-                   (.autoOutline w x y 1 256)
+                   (.autoOutline w (int x) (int y) (int 1) (int 256))
                    (let [roi ^ij.gui.Roi (ij.gui.PolygonRoi. (.xpoints w) (.ypoints w) (.npoints w) ij.gui.Roi/FREEROI #_ij.gui.Roi/POLYGON)
                          perim (.getLength roi)
                          area (java.lang.Math/pow (/ perim (* 2 java.lang.Math/PI)) 2)
                          r ^java.awt.Rectangle (.getBounds roi)]
                     (when (or  (< area min-size) 
                                 (> area max-size))
-                      (.setColor ip 0)
+                      (swap! rois conj roi)
+                      (if label-segments?
+                        (.setColor ip (count @rois))
+                        (.setColor ip 0))
                       (.fillPolygon
                         ip
                         ^java.awt.Polygon (.getPolygon roi)))))))))

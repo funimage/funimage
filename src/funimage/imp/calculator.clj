@@ -43,6 +43,7 @@
          (binary-fn imp1 imp2)
          (recur (binary-fn imp1 imp2) (first imps) (rest imps))))))
 
+;; Average and difference do not work as they intuitively should for more than 2 arguments.
 
 (def imp-add "Add 2 image pluses. img1 = img1+img2" (image-calculator-fn "Add" false true false))
 (def imp-subtract "Subtract 2 image pluses. img1 = img1-img2" (image-calculator-fn "Subtract" false true false))
