@@ -1,10 +1,7 @@
-(ns src.funimage.filters.gabor
+(ns funimage.filters.gabor
   (:use [funimage imp project utils]
         [funimage.imp calculator roi]
         [funimage.segmentation utils]))
-
-
-(defn abs [n] (max n (- n)))
 
 (defn make-odd [n] (if (not (odd? n))
                      (+ n 1)
@@ -44,13 +41,13 @@
         nstds 0.5
         row (max (java.lang.Math/ceil 
                    (max 1 
-                        (max (abs (* nstds x-sigma (java.lang.Math/cos direction)))
-                             (abs (* nstds y-sigma (java.lang.Math/sin direction))))))
+                        (max (java.lang.Math/abs (* nstds x-sigma (java.lang.Math/cos direction)))
+                             (java.lang.Math/abs (* nstds y-sigma (java.lang.Math/sin direction))))))
        
                  (java.lang.Math/ceil 
                    (max 1 
-                        (max (abs (* nstds x-sigma (java.lang.Math/sin direction))) 
-                             (abs (* nstds y-sigma (java.lang.Math/cos direction)))))))
+                        (max (java.lang.Math/abs (* nstds x-sigma (java.lang.Math/sin direction))) 
+                             (java.lang.Math/abs (* nstds y-sigma (java.lang.Math/cos direction)))))))
         columns row
         row-center (/ (+ row 1) 2)
         col-center (/ (+ columns 1) 2)
