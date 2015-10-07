@@ -638,12 +638,12 @@
                    (do 
                      (when (.isVirtual stack)
                        (ij.IJ/showStatus (str "Duplicating: " i "/" n)))
-                     (let [^ij.process.ImageProcessor ip2 (.getProcessor stack i)]
-                       (if (nil? stack2)
-                         (recur (inc i)
-                                ^ij.ImageStack (ij.ImageStack. (.getWidth ip2) (.getHeight ip2) (.getColorModel (.getProcessor imp))))
-                         (do (.addSlice stack2 (.getSliceLabel stack i) (.duplicate ip2))
-                           (recur (inc i) stack2)))))
+                     (let [^ij.process.ImageProcessor ip2 (.getProcessor stack i)
+                           stack2 (if (nil? stack2)
+                                    ^ij.ImageStack (ij.ImageStack. (.getWidth ip2) (.getHeight ip2) (.getColorModel (.getProcessor imp)))
+                                    stack2)]
+                       (.addSlice stack2 (.getSliceLabel stack i) (.duplicate ip2))
+                       (recur (inc i) stack2)))
                    stack2))]
     (let [imp2 (.createImagePlus imp)
           info (.getProperty imp "Info")
@@ -652,6 +652,7 @@
       (when info (.setProperty imp2 "Info" info))      
       (.setDimensions imp2 (nth dim 2) (nth dim 3) (nth dim 4))
       imp2)))
+
 
 (defn imp-from-clipboard
   "Return the imageplus in theclipboard."
