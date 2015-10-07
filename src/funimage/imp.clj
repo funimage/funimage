@@ -693,6 +693,14 @@
         (ImagePlus. (str "C" chan "-" (.getTitle imp))
                     new-stack)))))
 
+(defn split-rgb
+  "Split an RGB type image."
+  [^ij.ImagePlus imp]
+  (let [stacks (ij.plugin.ChannelSplitter/splitRGB (.getImageStack imp) false)]
+    (doall (for [idx (range (count stacks))]
+             (ij.ImagePlus. (str "C" idx "-" (get-title imp))
+                            (nth stacks idx))))))
+
 (defn split-stack
   "Split an imagestack."
   [imp]
