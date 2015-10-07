@@ -620,12 +620,38 @@
 
 ;; Depends on earlier functions
 
+#_(defn copy-imp
+   "Return a duplicate of an image."
+   [imp]
+   (.run (Duplicator.) imp)
+   #_(let [new-imp (.duplicate ^ImagePlus imp)]
+      (set-calibration new-imp (get-calibration imp))))
+
 (defn copy-imp
   "Return a duplicate of an image."
   [imp]
-  (.run (Duplicator.) imp)
-  #_(let [new-imp (.duplicate ^ImagePlus imp)]
-     (set-calibration new-imp (get-calibration imp))))
+  (let [^ij.ImageStack stack (.getStack imp)       
+        n (.getSize stack)
+        stack2 (loop [i 1
+                      ^ij.ImageStack stack2 nil]
+                 (if (<= i n)
+                   (do 
+                     (when (.isVirtual stack)
+                       (ij.IJ/showStatus (str "Duplicating: " i "/" n)))
+                     (let [^ij.process.ImageProcessor ip2 (.getProcessor stack i)]
+                       (if (nil? stack2)
+                         (recur (inc i)
+                                ^ij.ImageStack (ij.ImageStack. (.getWidth ip2) (.getHeight ip2) (.getColorModel (.getProcessor imp))))
+                         (do (.addSlice stack2 (.getSliceLabel stack i) (.duplicate ip2))
+                           (recur (inc i) stack2)))))
+                   stack2))]
+    (let [imp2 (.createImagePlus imp)
+          info (.getProperty imp "Info")
+          dim (.getDimensions imp)]
+      (.setStack imp2 (str "DUP_" (get-title imp)) stack2)
+      (when info (.setProperty imp2 "Info" info))      
+      (.setDimensions imp2 (nth dim 2) (nth dim 3) (nth dim 4))
+      imp2)))
 
 (defn imp-from-clipboard
   "Return the imageplus in theclipboard."
