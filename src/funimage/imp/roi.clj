@@ -86,6 +86,17 @@
       (.fill ^ij.process.ImageProcessor (.getProcessor mask) ^ij.gui.Roi (nth rois k)))
     mask))
 
+(defn fill-rois-convex-hull
+  "Fill ROIs, colors should by the same format as imp, which probably has to be single channel at the moment."
+  [imp rois colors]
+  (let [mask (create-imp-like imp)]
+    (.setSnapshotCopyMode (.getProcessor mask) false)
+    (dotimes [k (count rois)]      
+      (.setColor ^ij.process.ImageProcessor (.getProcessor mask) (nth colors k))
+      (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getConvexHull (nth rois k)))
+      #_(.fill ^ij.process.ImageProcessor (.getProcessor mask) ^ij.gui.Roi (nth rois k)))
+    mask))
+
 (defn roi-angle
   "Get the angle of a ROI."
   [^ij.gui.Roi roi]

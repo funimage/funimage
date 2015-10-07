@@ -404,7 +404,7 @@
 (defn put-pixel-int
   "Put a pixel value at x,y of the imageplus."
   [^ImagePlus imp x y val]
-  (.putPixel ^ImageProcessor (.getProcessor imp) x y val)
+  (.putPixel ^ImageProcessor (.getProcessor imp) (int x) (int y) (int val))
   imp)
 
 (defn put-pixel-int-unsafe
@@ -802,5 +802,19 @@
         ^ij.process.ImageProcessor (.getProcessor (nth imps k))
         (inc k)))
     imp))
+
+(defn imps-to-rgb
+  "Convert a sequence of imps (only first 3 or fewer if less supplied) to RGB."
+  [imps]
+  #_(ij.plugin.RGBStackMerge/mergeChannels (into-array ImagePlus (take 3 imps)) false)
+  (.mergeHyperstacks (ij.plugin.RGBStackMerge.) (into-array ImagePlus (take 3 imps)) false))
         
-  
+(defn get-fileinfo
+  "Return the fileinfo for an ImagePlus"
+  [imp]
+  ^ij.io.FileInfo (.getFileInfo imp))
+
+(defn get-filename
+  "Return the filename of an imageplus if it exists."
+  [imp]
+  (.fileName (get-fileinfo imp)))

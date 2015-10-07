@@ -24,7 +24,10 @@
         ;return-mask? (or (:return-mask argmap) false)        
         result-type (or (:return-type argmap) :original) ; :original, :mask, :labeled        
         method-args (str (when (or (:clear-results argmap) false) " clear")
-                         (when (or (:display-results argmap) false) " display")
+                         (when (or (= result-type :results)
+                                   (:display-results argmap)
+                                   false)
+                           " display")
                          (when (or (:add-results argmap) false) " add"))
         ]
     ;(println "Analyze particles arguments: " (str "size=" min-size "-" max-size " display clear add"))
@@ -45,6 +48,9 @@
                 (set-fill-value mask k)
                 (.fillPolygon ^ij.process.ImageProcessor (.getProcessor mask) ^java.awt.Polygon (.getPolygon roi))))
             mask)
+          (= result-type :results)
+          (let [rt (get-results-table)]
+            (results-table-to-map rt))
           :else imp)))
 
 #_(defn size-filter-stack
