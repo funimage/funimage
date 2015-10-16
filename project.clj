@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [seesaw "1.4.4"]
                  [me.raynes/fs "1.4.6"]
-                 
+                 [brevis "0.9.116"]
                  ;[net.imagej/ij "1.49v"]
                  [net.imagej/ij "1.50b"]
                  [sc.fiji/imagescience "2.5.0"]

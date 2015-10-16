@@ -1,11 +1,9 @@
 (ns funimage.filters.gabor
   (:use [funimage imp project utils]
         [funimage.imp calculator roi]
-        [funimage.segmentation utils]))
+        [funimage.segmentation utils]
+        [funimage.filters utils]))
 
-(defn make-odd [n] (if (not (odd? n))
-                     (+ n 1)
-                     n))
 (defn gauss-0
   [x y sigma]
   (java.lang.Math/exp (/ (- 0 (+ (* x x) (* y y))) (* 2 sigma sigma))))
