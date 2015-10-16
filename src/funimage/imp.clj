@@ -853,3 +853,46 @@
   "Return the filename of an imageplus if it exists."
   [imp]
   (.fileName (get-fileinfo imp)))
+
+(defn tile-imps
+  "Tile a set of images, currently assumes all are same size as the first one."
+  ([imps]
+    (when-not (empty? imps)
+      (let [width (java.lang.Math/floor (/ (count imps) (java.lang.Math/sqrt (count imps))))
+            height (java.lang.Math/ceil (/ (count imps) width))]
+        (tile-imps imps width height))))
+  ([imps width height]
+    (let [imp-width (get-width (first imps))
+          imp-height (get-height (first imps))
+          tile-imp ^ImagePlus (create-imp :width (* imp-width width) :height (* imp-height height) :type (get-type-string (first imps)))]
+      (doall (for [tx (range width)
+                   ty (range height)
+                   impx (range imp-width)
+                   impy (range imp-height)]
+               (let [imp-idx (+ tx (* width ty))]; consider getRow, putRow
+                 (when (< imp-idx (count imps))
+                   (put-pixel-int tile-imp
+                              (+ impx (* imp-width tx))
+                              (+ impy (* imp-height ty))
+                              (get-pixel ^ImagePlus (nth imps imp-idx)
+                                         impx impy))))))
+      tile-imp)))
+
+(defn imp-flatten
+  "Flatten the overlay of an imageplus."
+  [^ImagePlus imp]
+  (.flatten imp))
+
+(defn add-overlay-image
+  "Add an overlay image into an image at a certain position." ;missing a size check
+  [^ImagePlus imp ^ImagePlus overlay x y opacity zero-transparent]
+  (let [roi (ij.gui.ImageRoi. x y (.getProcessor overlay))]
+    (.setName roi "overlay") ;roi.setName(overlay.getShortTitle());		
+    (when-not (= opacity 100)
+      (.setOpacity roi (/ opacity 100.0)))
+    (.setZeroTransparent roi zero-transparent)
+    (let [overlay-list (.getOverlay imp)
+          overlay-list (if overlay-list overlay-list (ij.gui.Overlay.))]
+      (.add overlay-list roi)
+			(.setOverlay imp overlay-list)))
+  imp); could add undo
