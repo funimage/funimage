@@ -59,45 +59,87 @@
         (= method-name :triangle) (Auto_Threshold/Triangle data)
         (= method-name :yen) (Auto_Threshold/Yen data)))    
 
-(defn autothreshold
-  "Autotheshold an imageplus with the supplied method.
+#_(defn autothreshold
+   "Autotheshold an imageplus with the supplied method.
 Valid method names:
 :IJ-default, :huang, :intermodes, :iso-data, :li, :max-entropy, :mean, :min-error-i, :minimum, :moments, :otsu, :percentile, :renyi-entropy, :shanbhag, :triangle, :yen
 This list is programmatically accessible as: funimage.imp.threshold/threshold-methods"
-  [^ImagePlus imp method-name noWhite noBlack doIwhite doIset doIlog doIstackHistogram]
-  (when (and (not (nil? imp)) 
-             (thresholdable-imp? imp))
-    (let [current-slice (.getCurrentSlice imp)
-          ip ^ImageProcessor (.getProcessor imp)
-          xe (.getWidth ip)
-          ye (.getHeight ip)
-          ;int x, y, c=0;
-          c 0
-          b (if (= (.getBitDepth imp) 8) 255 65535)
-          [c b] (if doIwhite [b 0] [c b])
-          data ^ints (.getHistogram ip)
-          ;temp = new int [data.length];
-          ]
-      (IJ/showStatus "Thresholding...")
-      ; Undo, and stack histogram stuff would be here
-      ;if (noBlack) data[0]=0;
-      ;if (noWhite) data[data.length - 1]=0;
-      (let [minbin (some #(when (pos? (nth data %)) %) (range (count data)))
-            maxbin (some #(when (pos? (nth data %)) %) (reverse (range (count data))))
-            data2 (int-array (drop minbin (take maxbin data)))
-            threshold (+ minbin (autothreshold-level data2 method-name))]
-        (println "Threshold = " threshold)
-        (if doIset 
-          (if doIwhite
-            (.setThreshold (.getProcessor imp) (inc threshold) (dec (count data)) ImageProcessor/RED_LUT)
-            (.setThreshold (.getProcessor imp) 0 threshold ImageProcessor/RED_LUT))
-          (.threshold (.getProcessor imp) (int threshold)))    
-        imp
-          #_(img->imp 
-             (first (walk-imgs
-                      (fn [^Cursor cur] (.set (.get cur) 
-                                          (if (> (.getRealFloat (.get cur)) threshold) 255 0)))
-                 (imp->img imp))))))))
+   [^ImagePlus imp method-name noWhite noBlack doIwhite doIset doIlog doIstackHistogram]
+   (when (and (not (nil? imp)) 
+              (thresholdable-imp? imp))
+     (let [current-slice (.getCurrentSlice imp)
+           ip ^ImageProcessor (.getProcessor imp)
+           xe (.getWidth ip)
+           ye (.getHeight ip)
+           ;int x, y, c=0;
+           c 0
+           b (if (= (.getBitDepth imp) 8) 255 65535)
+           [c b] (if doIwhite [b 0] [c b])
+           data ^ints (.getHistogram ip)
+           ;temp = new int [data.length];
+           ]
+       (IJ/showStatus "Thresholding...")
+       ; Undo, and stack histogram stuff would be here
+       ;if (noBlack) data[0]=0;
+       ;if (noWhite) data[data.length - 1]=0;
+       (let [minbin (some #(when (pos? (nth data %)) %) (range (count data)))
+             maxbin (some #(when (pos? (nth data %)) %) (reverse (range (count data))))
+             data2 (int-array (drop minbin (take maxbin data)))
+             threshold (+ minbin (autothreshold-level data2 method-name))]
+         (println "Threshold = " threshold)
+         (if doIset 
+           (if doIwhite
+             (.setThreshold (.getProcessor imp) (inc threshold) (dec (count data)) ImageProcessor/RED_LUT)
+             (.setThreshold (.getProcessor imp) 0 threshold ImageProcessor/RED_LUT))
+           (.threshold (.getProcessor imp) (int threshold)))    
+         imp
+           #_(img->imp 
+              (first (walk-imgs
+                       (fn [^Cursor cur] (.set (.get cur) 
+                                           (if (> (.getRealFloat (.get cur)) threshold) 255 0)))
+                  (imp->img imp))))))))
+
+(defn autothreshold
+   "Autotheshold an imageplus with the supplied method.
+Valid method names:
+:IJ-default, :huang, :intermodes, :iso-data, :li, :max-entropy, :mean, :min-error-i, :minimum, :moments, :otsu, :percentile, :renyi-entropy, :shanbhag, :triangle, :yen
+This list is programmatically accessible as: funimage.imp.threshold/threshold-methods"
+   [^ImagePlus imp method-name noWhite noBlack doIwhite doIset doIlog doIstackHistogram]
+   (when (and (not (nil? imp)) 
+              (thresholdable-imp? imp))
+     (let [stack ^ImageStack (.getStack imp)
+           stack-histogram (when doIstackHistogram
+                             (.histogram (ij.process.StackStatistics. imp)))]
+       (dotimes [k (.getSize stack)]                
+         (let [current-slice (inc k) #_(.getCurrentSlice imp)
+               ip ^ImageProcessor (.getProcessor stack (inc k))
+               xe (.getWidth ip)
+               ye (.getHeight ip)
+               ;int x, y, c=0;
+               c 0
+               b (if (= (.getBitDepth imp) 8) 255 65535)
+               [c b] (if doIwhite [b 0] [c b])
+               data ^ints (if doIstackHistogram
+                            stack-histogram
+                            (.getHistogram ip))
+               ;temp = new int [data.length];
+               ]
+           (IJ/showStatus "Thresholding...")
+           ; Undo, and stack histogram stuff would be here
+           ;if (noBlack) data[0]=0;
+           ;if (noWhite) data[data.length - 1]=0;
+           (let [minbin (some #(when (pos? (nth data %)) %) (range (count data)))
+                 maxbin (some #(when (pos? (nth data %)) %) (reverse (range (count data))))
+                 data2 (int-array (drop minbin (take maxbin data)))
+                 threshold (+ minbin (autothreshold-level data2 method-name))]
+             ;(println "Threshold = " threshold)
+             (if doIset 
+               (if doIwhite
+                 (.setThreshold ip (inc threshold) (dec (count data)) ImageProcessor/RED_LUT)
+                 (.setThreshold ip 0 threshold ImageProcessor/RED_LUT))
+               (.threshold ip (int threshold)))))))
+     imp))
+
   
 #_(do 
    (def imp (convert-to-8bit (open-imp "hello-communist-kitty_bw.tif")))

@@ -797,15 +797,9 @@
   (ij.IJ/run "Close All" ""))
 (def clear-all-images close-all-images); deprecated
 
-(defn max-z-projection
-  "Return a max Z-projection."
-  [imp]
-  (ij.IJ/run imp "Z Project..." "projection=[Max Intensity]")
-  (ij.WindowManager/getImage (str "MAX_" (.getTitle imp))))
-
 (defn update-imp
   "Update the display of an imp."
-  [imp]
+  [^ImagePlus imp]
   (.updateAndRepaintWindow imp))
         
 (defn open-image-sequence
@@ -844,6 +838,28 @@
   #_(ij.plugin.RGBStackMerge/mergeChannels (into-array ImagePlus (take 3 imps)) false)
   (.mergeHyperstacks (ij.plugin.RGBStackMerge.) (into-array ImagePlus (take 3 imps)) false))
         
+
+; IJ1-style
+(defn max-z-projection
+  "Return a max Z-projection."
+  [imp]
+  (ij.IJ/run imp "Z Project..." "projection=[Max Intensity]")
+  (ij.WindowManager/getImage (str "MAX_" (.getTitle imp))))
+
+#_(defn max-z-projection
+    "Return a max Z-projection."
+    [^ImagePlus imp]
+    (let [start-slice 1
+          stop-slice (.getNFrames imp)]
+      (cond (.isHyperStack imp)
+            ;(do-hyperstack-projection imp start-slice stop-slice)
+            nil ; lazier than i should be 
+            (= (get-type-string imp) "RGB")
+            (apply imps-to-rgb
+                   (map max-z-projection (split-rgb imp)))
+            :else
+            (do-projection imp start-slice stop-slice))))
+
 (defn get-fileinfo
   "Return the fileinfo for an ImagePlus"
   [imp]
