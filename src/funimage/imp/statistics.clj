@@ -76,7 +76,7 @@
      :area-fraction (.areaFraction stats)
      :bin-size (.binSize stats)
      :perimeter (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp))) 
-     :circularity (* 4.0 java.lang.Math/PI (/ (.area stats) (apply * (repeat 2 (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp))))))) 
+     :circularity (when (.getRoi imp) (* 4.0 java.lang.Math/PI (/ (.area stats) (apply * (repeat 2 (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp)))))))) 
      ;:cal (.cal stats); should probably expand calibration
      :dmode (.dmode stats)
      ;:height (.height stats)
