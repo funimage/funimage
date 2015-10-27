@@ -1,5 +1,5 @@
 (ns funimage.segmentation.imp
- (:use [funimage imp project]
+ (:use [funimage imp]
        [funimage.imp threshold calculator roi]
        [funimage.segmentation utils])
  (:require [clojure.string :as string])
@@ -153,43 +153,45 @@
          hist-sum (apply + hist)
          norm-hist (map #(float (/ % hist-sum)) hist)
          hist-step (.binSize stats)]
-     (spit (str (project-directory) "/" basename "_" measure "_hist.csv")
-           (string/join "\n"
-                        (map #(string/join "\t" %)
-                             (map list 
-                                  (map #(float %) (range hist-min hist-max hist-step))
-                                  hist
-                                  norm-hist)))))
+     #_(spit (str (project-directory) "/" basename "_" measure "_hist.csv")
+            (string/join "\n"
+                         (map #(string/join "\t" %)
+                              (map list 
+                                   (map #(float %) (range hist-min hist-max hist-step))
+                                   hist
+                                   norm-hist)))));; This is the data you want!!!!!
 
-   (IJ/selectWindow (str "Histogram of " measure))
-   (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/" basename "_" measure "_hist.tif"))
-   (.close (IJ/getImage)))))
+   #_(IJ/selectWindow (str "Histogram of " measure))
+   #_(IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/" basename "_" measure "_hist.tif"))
+   #_(.close (IJ/getImage))
+   (IJ/getImage)))); return data instead of an image.
 
 #_(let [hist (range 10)
        shift -2]
    (if (neg? shift)
      (concat (drop (+ (count hist) shift) hist) (take (+ (count hist) shift) hist))
      (concat (drop shift hist) (take shift hist))))
-         
-(defn segment-attribute-color-coding
-  "Color code segments by an attribute. Requires BAR plugin. Consider using segment-attribute-imp with a LUT"
-  [measure imp lut]; Round, Angle
-  (IJ/selectWindow (.getTitle imp) #_"particles.tif")
-  (let [minval 0
-        result-table (get-results-table)
-        maxval (cond (= measure "Round") 1
-                     (= measure "Angle") 180
-                     :else (apply max (for [k (range #_(.size result-table) (.getCounter result-table))] (.getValue result-table measure k))))]
-    (IJ/run imp "ROI Color Coder" (str "measurement=" measure " lut=[" lut "] width=0 opacity=80 label=micron^2 range=" ;Ice, Spectrum
-												  minval "-" maxval " n.=5 decimal=0 ramp=[256 pixels] font=SansSerif font_size=14 draw")))
-  ;(.runCommand roi-manager "show all without labels")
-  (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/" measure "_legend.tif"))
-  (.close (IJ/getImage)); close legend
-  (.runCommand (get-roi-manager) "show all without labels")
-  (IJ/run "Flatten")
-  (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/" measure ".tif"))
-  (IJ/getImage)
-  #_(.close (IJ/getImage)))
+  
+; Works, but relies on BAR
+#_(defn segment-attribute-color-coding
+   "Color code segments by an attribute. Requires BAR plugin. Consider using segment-attribute-imp with a LUT"
+   [measure imp lut]; Round, Angle
+   (IJ/selectWindow (.getTitle imp) #_"particles.tif")
+   (let [minval 0
+         result-table (get-results-table)
+         maxval (cond (= measure "Round") 1
+                      (= measure "Angle") 180
+                      :else (apply max (for [k (range #_(.size result-table) (.getCounter result-table))] (.getValue result-table measure k))))]
+     (IJ/run imp "ROI Color Coder" (str "measurement=" measure " lut=[" lut "] width=0 opacity=80 label=micron^2 range=" ;Ice, Spectrum
+												   minval "-" maxval " n.=5 decimal=0 ramp=[256 pixels] font=SansSerif font_size=14 draw")))
+   ;(.runCommand roi-manager "show all without labels")
+   (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/" measure "_legend.tif"))
+   (.close (IJ/getImage)); close legend
+   (.runCommand (get-roi-manager) "show all without labels")
+   (IJ/run "Flatten")
+   (IJ/saveAs (IJ/getImage) "Tiff" (str (project-directory) "/" measure ".tif"))
+   (IJ/getImage)
+   #_(.close (IJ/getImage)))
 
 #_(defn segment-attribute-imp
    "Return an imp with segments labeled based on a measure.
@@ -300,4 +302,54 @@ Uses centroids"
                  img)
       [new-imp (img->imp img)]))
 
+#_(defn stack-to-regions-2d
+   "Size filter an image slice by slice over the whole stack."
+   [imp & args]
+   (let [argmap (apply hash-map args)
+         regions (atom [])
+         stack ^ij.ImageStack (.getImageStack imp)
+         history ^ij.ImagePlus (create-imp-like imp)
+         history-stack ^ij.ImageStack (.getImageStack history)]
+     (dotimes [idx (.getSize stack)]
+       (let [ip ^ij.process.ImageProcessor (.getProcessor stack (inc idx))
+             hip ^ij.process.ImageProcessor (.getProcessor history-stack (inc idx))
+             w ^ij.gui.Wand (ij.gui.Wand. ip)]
+         (doall (for [x (range (get-width imp)) y (range (get-height imp))]
+                  (when (and (zero? (.getPixel hip x y))
+                             #_(> (.getPixel ip x y) 0)); could throw out contiguous 0s from search as well
+                    (.autoOutline w (int x) (int y) (int 1) (int 256))
+                    (let [roi ^ij.gui.Roi (ij.gui.PolygonRoi. (.xpoints w) (.ypoints w) (.npoints w) ij.gui.Roi/FREEROI #_ij.gui.Roi/POLYGON)
+                          perim (.getLength roi)
+                          area (java.lang.Math/pow (/ perim (* 2 java.lang.Math/PI)) 2)
+                          r ^java.awt.Rectangle (.getBounds roi)]
+                      (set-fill-value history 255)
+                      (.fillPolygon ^ij.process.ImageProcessor hip ^java.awt.Polygon (.getPolygon roi))
+                      (swap! regions conj {:roi roi
+                                           :z idx
+                                           :area area})))))))
+     @regions))
 
+(defn imp-to-rois
+  "Return a collection of ROIs from an imp."
+  [^ImagePlus imp & args]
+  (let [argmap (apply hash-map args)
+        min-size (or (:min-size argmap) 0)
+        max-size (or (:max-size argmap) "Infinity")
+        ;return-mask? (or (:return-mask argmap) false)        
+        result-type (or (:return-type argmap) :original) ; :original, :mask, :labeled        
+        method-args (str (when (or (:clear-results argmap) false) " clear")
+                         (when (or (= result-type :results)
+                                   (:display-results argmap)
+                                   false)
+                           " display")
+                         " exclude add")
+        manager (ij.plugin.frame.RoiManager. true)]
+    (ij.plugin.filter.ParticleAnalyzer/setRoiManager manager)
+    (ij.IJ/run imp "Analyze Particles..." method-args)
+    (.getRoisAsArray manager)))
+
+;(close-all-images)
+#_(let [imp (autothreshold (invert (open-imp "/Users/kyle/git/KidneyImageAnalysis/new_data/3/all_cutout_20150519-081425_CD31.tif"))
+                          :otsu false false false false false false)]
+   (show-imp imp)
+   (def rgs (stack-to-regions-2d imp)))

@@ -114,10 +114,16 @@
 
 (defn resize-imp
   "Resize an image."
-  [imp width height]
-  (ImagePlus. (str (.getTitle ^ImagePlus imp) "-resized_" width "x" height)
-              (.resize (.getProcessor imp) width height true)
-              #_(.getScaledInstance (.getImage ^ImagePlus imp) width height java.awt.Image/SCALE_SMOOTH)))
+  [^ImagePlus imp width height]
+  (let [stack ^ImageStack (.getStack imp)
+        new-stack ^ImageStack (ij.ImageStack. width height)]
+     (dotimes [k (.getSize stack)]
+       (.addSlice new-stack 
+         (.resize ^ImageProcessor (.getProcessor stack (inc k)) width height true)))
+     (ImagePlus. (str (.getTitle ^ImagePlus imp) "-resized_" width "x" height) new-stack)
+     #_(ImagePlus. (str (.getTitle ^ImagePlus imp) "-resized_" width "x" height)
+                  (.resize (.getProcessor imp) width height true)
+                  #_(.getScaledInstance (.getImage ^ImagePlus imp) width height java.awt.Image/SCALE_SMOOTH))))
 
 ;; ImageProcessor based functions
 
@@ -758,7 +764,7 @@
       (let [ip ^ij.process.ImageProcessor (.getProcessor stack (inc idx))
             w ^ij.gui.Wand (ij.gui.Wand. ip)]
         (doall (for [x (range (get-width imp)) y (range (get-height imp))]
-                 (when (> (.getPixel ip x y) 0)
+                 (when (> (.getPixel ip x y) 0); could throw out contiguous 0s from search as well
                    (.autoOutline w (int x) (int y) (int 1) (int 256))
                    (let [roi ^ij.gui.Roi (ij.gui.PolygonRoi. (.xpoints w) (.ypoints w) (.npoints w) ij.gui.Roi/FREEROI #_ij.gui.Roi/POLYGON)
                          perim (.getLength roi)
@@ -832,16 +838,32 @@
         (inc k)))
     imp))
 
-(defn imps-to-rgb
-  "Convert a sequence of imps (only first 3 or fewer if less supplied) to RGB."
-  [imps]
-  #_(ij.plugin.RGBStackMerge/mergeChannels (into-array ImagePlus (take 3 imps)) false)
-  (.mergeHyperstacks (ij.plugin.RGBStackMerge.) (into-array ImagePlus (take 3 imps)) false))
+(defn conj-imps
+  "Conj an image to another image's stack."
+  [target-stack imp]
+  (zconcat-imps(conj (vec (split-channels target-stack)) imp)))
+  
+
+#_(defn imps-to-rgb
+   "Convert a sequence of imps (only first 3 or fewer if less supplied) to RGB."
+   [imps & args]
+   #_(ij.plugin.RGBStackMerge/mergeChannels (into-array ImagePlus (take 3 imps)) false)
+   (let [argmap (apply hash-map args)]
+     (.mergeHyperstacks (ij.plugin.RGBStackMerge.) (into-array ImagePlus (take 3 imps)) (or (:keep-source argmap) false))))
         
+(defn imps-to-rgb
+   "Convert a sequence of imps (only first 3 or fewer if less supplied) to RGB."
+   [imps & args]
+   #_(ij.plugin.RGBStackMerge/mergeChannels (into-array ImagePlus (take 3 imps)) false)
+   (let [argmap (apply hash-map args)]
+     (ij.plugin.RGBStackMerge/mergeChannels (into-array ImagePlus (take 3 imps)) 
+                                            (or (:keep-source argmap) false) )
+     #_(.mergeHyperstacks (ij.plugin.RGBStackMerge.) (into-array ImagePlus (take 3 imps)) 
+        (or (:keep-source argmap) false))))
 
 ; IJ1-style
 (defn max-z-projection
-  "Return a max Z-projection."
+  "Return a max Z-projection. This is pretty dangerous because it uses window titles"
   [imp]
   (ij.IJ/run imp "Z Project..." "projection=[Max Intensity]")
   (ij.WindowManager/getImage (str "MAX_" (.getTitle imp))))
