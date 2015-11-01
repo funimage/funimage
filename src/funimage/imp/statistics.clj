@@ -27,14 +27,15 @@
            [net.imglib2.algorithm.gauss3 Gauss3]
            [net.imglib2.algorithm.dog DifferenceOfGaussian]
            [net.imglib2.view Views IntervalView]
-           [net.imglib2 Cursor RandomAccess]))
+           [net.imglib2 Cursor RandomAccess])
+  (:use [funimage imp]))
 
 (defn get-available-measurements
   "Return a sequence of keywords corresponding to available measurements."
   []
-  [:add-to-overlay  :area  :area-fraction  :center-of-mass  :centroid  :circularity  :ellipse  :feret  :integrated-density  :invert-y  
+  #{:add-to-overlay  :area  :area-fraction  :center-of-mass  :centroid  :circularity  :ellipse  :feret  :integrated-density  :invert-y  
    :kurtosis  :labels  :limit  :max-standards  :mean  :median  :min-max  :mode  :nan-empty-cells  :perimeter  :rect  
-   :scientific-notation  :shape-descriptors  :skewness  :slice  :stack-position  :std-dev])
+   :scientific-notation  :shape-descriptors  :skewness  :slice  :stack-position  :std-dev})
 
 (defn get-image-statistics
   "Return a map of image statistics."
@@ -75,8 +76,12 @@
      :area (.area stats)
      :area-fraction (.areaFraction stats)
      :bin-size (.binSize stats)
-     :perimeter (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp))) 
-     :circularity (when (.getRoi imp) (* 4.0 java.lang.Math/PI (/ (.area stats) (apply * (repeat 2 (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp)))))))) 
+     :perimeter (if (.getRoi imp) 
+                  (.getLength ^ij.gui.Roi (.getRoi imp))
+                  (+ (* 2 (get-width imp)) (* 2 (get-height imp)))) 
+     :circularity (if (.getRoi imp)
+                    (* 4.0 java.lang.Math/PI (/ (.area stats) (apply * (repeat 2 (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp)))))))
+                    1) 
      ;:cal (.cal stats); should probably expand calibration
      :dmode (.dmode stats)
      ;:height (.height stats)
@@ -116,3 +121,35 @@
      ;:pixel-height (.ph stats)
      ;:pixel-width (.pw stats)
      }))   
+
+(defn rolling-ball-statistics
+  "Take the statistics of rois within a search radius centered at each input roi."
+  [rois search-radius & args]
+  (let [argmap (apply hash-map args)
+        mergable-keys #{:area :angle :x-center-of-mass :y-center-of-mass :perimeter :circularity :major :minor :mean :median :mode :skewness :std-dev :uncalibrated-mean :x-centroid :y-centroid}
+        ; don't forget to keep the ROI
+        #_(disj (get-available-measurements)
+               :histogram :histogram-16bit)
+        distance-keys [:x-center-of-mass :y-center-of-mass]; We don't have to always be spatial
+        ]
+    (doall 
+      (for [target-roi rois]
+        (let [neighbors (map #(select-keys % mergable-keys)
+                             (filter (fn [nr] 
+                                       (let [dist (java.lang.Math/sqrt                                    
+                                                    (apply +
+                                                           (map #(java.lang.Math/pow (- (target-roi %) (nr %)) 2)
+                                                                distance-keys)))]
+                                         (< dist search-radius)))
+                                     rois))
+              merged-maps (apply (partial merge-with +) neighbors)
+              ncount (count neighbors)]              
+          (assoc (into {}
+                       (for [[k v] merged-maps]
+                         [k (cond (:average-values argmap)
+                                  (if (zero? ncount) 0 (/ v ncount))
+                                  :else
+                                  v)]))
+                 :roi (:roi target-roi)))))))
+                 
+            

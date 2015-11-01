@@ -241,6 +241,28 @@ You need to run analyze particles first."
           #_(println k result-idx))))
     new-imp))
 
+(defn color-code-rois
+  "Return an imp with segments labeled based on a measure.
+You need to run analyze particles first."
+  [imp roi-maps key-fn]
+  (let [new-imp #_(copy-imp imp)
+        (create-imp :title (str (name key-fn) "_" (get-title imp))
+                    :type "32-bit"
+                    :width (get-width imp)
+                    :height (get-height imp))]
+    (dotimes [k (count roi-maps)]; This can be a for now
+      (let [roi-map (nth roi-maps k)
+            roi (:roi roi-map)
+            bounds (.getBounds roi)
+            v (key-fn roi-map)]
+        ;(set-fill-value new-imp v)        
+        (.setValue ^ij.process.ImageProcessor (.getProcessor new-imp) v)
+        (.setColor ^ij.process.ImageProcessor (.getProcessor new-imp) v)
+        (.fillPolygon
+          ^ij.process.ImageProcessor (.getProcessor new-imp)
+          ^java.awt.Polygon (.getPolygon roi))))
+    new-imp))
+
 ; color coded legend  with histogram
 ; density of neighboring particles
 ; density of neighboring particles weighted by area coverage
@@ -348,8 +370,3 @@ Uses centroids"
     (ij.IJ/run imp "Analyze Particles..." method-args)
     (.getRoisAsArray manager)))
 
-;(close-all-images)
-#_(let [imp (autothreshold (invert (open-imp "/Users/kyle/git/KidneyImageAnalysis/new_data/3/all_cutout_20150519-081425_CD31.tif"))
-                          :otsu false false false false false false)]
-   (show-imp imp)
-   (def rgs (stack-to-regions-2d imp)))
