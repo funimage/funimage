@@ -554,6 +554,18 @@
   (.setVoxel ^ImageStack (.getImageStack imp) x y z val)
   imp)
 
+(defn convert-to-binary
+  "Convert an imageplus to 8 bit using the image stack."
+  [^ImagePlus imp]
+  (ij.IJ/run imp "Make Binary" "")
+  imp
+  #_(let [stack ^ImageStack (.getImageStack imp)
+         outstack ^ImageStack (ImageStack. (.getWidth stack) (.getHeight stack))]
+     (dotimes [k (.getSize stack)]
+       (.addSlice outstack
+          (.convertToByteProcessor (.getProcessor stack (inc k)))))
+     (ImagePlus. (.getTitle imp) outstack)))
+
 (defn convert-to-8bit
   "Convert an imageplus to 8 bit using the image stack."
   [^ImagePlus imp]

@@ -1,4 +1,4 @@
-(defproject funimage/funimage "0.1.82"
+(defproject funimage/funimage "0.1.83"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [seesaw "1.4.4"]
                  [me.raynes/fs "1.4.6"]
-                 [brevis "0.9.116"]
+                 ;[brevis "0.9.116"]
                  ;[net.imagej/ij "1.49v"]
                  [net.imagej/ij "1.50b"]
                  [sc.fiji/imagescience "2.5.0"]

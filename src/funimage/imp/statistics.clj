@@ -151,5 +151,39 @@
                                   :else
                                   v)]))
                  :roi (:roi target-roi)))))))
+
+(defn correlated-rolling-ball-statistics
+  "Take the statistics of rois within a search radius centered at each input roi."
+  [focal-rois correlation-rois search-radius & args]
+  (let [argmap (apply hash-map args)
+        mergable-keys #{:area :angle :x-center-of-mass :y-center-of-mass :perimeter :circularity :major :minor :mean :median :mode :skewness :std-dev :uncalibrated-mean :x-centroid :y-centroid}
+        ; don't forget to keep the ROI
+        #_(disj (get-available-measurements)
+               :histogram :histogram-16bit)
+        distance-keys [:x-center-of-mass :y-center-of-mass]; We don't have to always be spatial
+        ]
+    (doall 
+      (for [target-roi focal-rois]
+        (let [neighbors (map #(select-keys % mergable-keys)
+                             (filter (fn [nr] 
+                                       (let [dist (java.lang.Math/sqrt                                    
+                                                    (apply +
+                                                           (map #(java.lang.Math/pow (- (target-roi %) (nr %)) 2)
+                                                                distance-keys)))]
+                                         (< dist search-radius)))
+                                     correlation-rois))
+              merged-maps (apply (partial merge-with +) neighbors)
+              ncount (count neighbors)]              
+          (assoc (if (zero? ncount); might need to do this for normal rolling ball statistics too
+                   (into {}
+                         (for [k mergable-keys]
+                           [k 0]))
+                   (into {}
+                         (for [[k v] merged-maps]
+                           [k (cond (:average-values argmap)
+                                    (if (zero? ncount) 0 (/ v ncount))
+                                    :else
+                                    (if (nil? v) 0 v))])))
+                 :roi (:roi target-roi)))))))
                  
             
