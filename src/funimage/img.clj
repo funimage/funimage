@@ -17,6 +17,10 @@
            [net.imglib2.algorithm.binary Thresholder]
            ))
 
+(defn get-img-type
+  "Return the class type of an image."
+  [^Img img]
+  (net.imglib2.util.Util/getTypeFromInterval img))  
 
 (defn map-imgs
    "Walk all images (as cursors) applying f at each step. 
@@ -142,7 +146,9 @@ If you have an ImagePlus, then use funimage.conversion"
   "Binarize an image about a threshold"
   [img threshold]
   (Thresholder/threshold img 
-                         (net.imglib2.type.numeric.integer.UnsignedByteType. threshold); Could cond check this 
+                         (let [tval (.copy (get-img-type img))] 
+                           (.set tval threshold) 
+                           tval)
                          true
                          1))
 

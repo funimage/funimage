@@ -3,7 +3,7 @@
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
             :url "https://github.com/funimage/funimage/LICENSE"}
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
                  [seesaw "1.4.4"]
                  [me.raynes/fs "1.4.6"]
 
