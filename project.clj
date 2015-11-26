@@ -1,4 +1,4 @@
-(defproject funimage/funimage "0.1.83"
+(defproject funimage/funimage "0.1.83-SNAPSHOT"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -6,29 +6,27 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [seesaw "1.4.4"]
                  [me.raynes/fs "1.4.6"]
-                 ;[brevis "0.9.116"]
-                 ;[net.imagej/ij "1.49v"]
+
+                 ; Java libs
                  [net.imagej/ij "1.50b"]
                  [sc.fiji/imagescience "2.5.0"]
                  
-                 [net.imglib2/imglib2 "2.4.0"];[net.imglib2/imglib2 "2.2.1"]
+                 [net.imglib2/imglib2 "2.4.1"]
                  [net.imglib2/imglib2-algorithm-gpl "0.1.5"];[net.imglib2/imglib2-algorithm-gpl "0.1.4"]
                  [net.imglib2/imglib2-algorithm-fft "0.1.2"]
-                 [net.imglib2/imglib2-algorithm "0.3.1"];[net.imglib2/imglib2-algorithm "0.2.1"]
+                 [net.imglib2/imglib2-algorithm "0.3.3"];[net.imglib2/imglib2-algorithm "0.2.1"]
                  [net.imglib2/imglib2-ij "2.0.0-beta-31"];[net.imglib2/imglib2-ij "2.0.0-beta-28"]
-                 [net.imglib2/imglib2-ops "2.0.0-beta-26"]
+                 [net.imglib2/imglib2-ops "2.0.0-beta-26"]                 
                  [net.imglib2/imglib2-io "2.0.0-beta-21"]
                  [net.imglib2/imglib2-ui "2.0.0-beta-29"]
                  [net.imglib2/imglib2-realtransform "2.0.0-beta-29"]
                  
                  [io.scif/scifio "0.25.0"]
                  
-                 [net.imagej/imagej "2.0.0-rc-41"]
-                 [net.imagej/imagej-ops "0.22.0"]
+                 [net.imagej/imagej "2.0.0-rc-43" :exclusions [com.github.jnr/jffi com.github.jnr/jnr-x86asm]]
+                 ;[net.imagej/imagej-ops "0.18.1-SNAPSHOTkh"]; currently needed for funimage.img.skeleton
+                 [net.imagej/imagej-ops "0.23.0"]
                  ;[net.imagej/imagej-legacy "0.17.3"]
-                 
-                 ;[net.imagej/imagej-ops "0.18.1-SNAPSHOT"]; currently needed for funimage.img.skeleton
-
                  [org.scijava/scijava-common "2.46.0"]
                  
                  [ome/bioformats_package "5.1.1"]

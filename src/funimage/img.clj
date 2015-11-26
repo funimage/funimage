@@ -119,6 +119,13 @@ If you have an ImagePlus, then use funimage.conversion"
            cursor-mul
            img1 img2)))
 
+(defn scale-img
+  "Scale the image."
+  [img scalar]
+  (first (map-imgs 
+           #(cursor-set-val (* (cursor-get-val %) scalar))
+           img)))
+
 #_(defn threshold-img
    "Convert an image into a binary one about a threshold."
    ([img threshold]

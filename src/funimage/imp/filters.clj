@@ -1,4 +1,4 @@
-(ns funimage.imp.filters
+(ns funimage.imp.filters  
   (:use [funimage imp]
         [funimage.imp calculator])
   (:require [clojure.string :as string]
@@ -9,7 +9,6 @@
            [ij.io FileSaver]
            [javax.media.j3d Transform3D]
            [javax.vecmath Vector3f Point3f Quat4f]
-           [ij.gui NewImage Toolbar]
            [ij.process ImageProcessor ByteProcessor ImageStatistics FHT ]
            [ij.measure Calibration]
            
