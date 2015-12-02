@@ -370,3 +370,42 @@ Uses centroids"
     (ij.IJ/run imp "Analyze Particles..." method-args)
     (.getRoisAsArray manager)))
 
+(defn imp-to-rois2
+  "Size filter an image slice by slice over the whole stack."
+  [imp & args]
+  (let [argmap (apply hash-map args)
+        min-size (or (:min-size argmap) 0)
+        max-size (or (:max-size argmap) "Infinity")
+        max-size (if (string? max-size) java.lang.Integer/MAX_VALUE max-size)
+        rois (atom [])
+        imp (copy-imp imp); Don't damage the input, oh so lazy
+        stack ^ij.ImageStack (.getImageStack imp)]
+    (dotimes [idx (.getSize stack)]
+      (let [ip ^ij.process.ImageProcessor (.getProcessor stack (inc idx))
+            w ^ij.gui.Wand (ij.gui.Wand. ip)]
+        (doall (for [x (range (get-width imp)) y (range (get-height imp))]
+                 (when (> (.getPixel ip x y) 0); could throw out contiguous 0s from search as well
+                   (.autoOutline w (int x) (int y) (int 1) (int 256))                   
+                   (let [roi ^ij.gui.Roi (ij.gui.PolygonRoi. (.xpoints w) (.ypoints w) (.npoints w) ij.gui.Roi/FREEROI #_ij.gui.Roi/POLYGON)
+                         perim (.getLength roi)
+                         area (java.lang.Math/pow (/ perim (* 2 java.lang.Math/PI)) 2)
+                         r ^java.awt.Rectangle (.getBounds roi)]
+                     (.setColor ip 0)
+                     (.fillPolygon
+                        ip
+                        ^java.awt.Polygon (.getPolygon roi))
+                     (swap! rois conj roi)))))))
+    @rois))
+
+(defn rois-to-imp
+  "Render a collection of rois as an image. Currently defaults to binary, will change.
+This function writes to imp. Only works on 1 slice."
+  [imp rois & args]
+  (doseq [roi rois]
+    ;(println roi)
+    (.setColor ^ij.process.ImageProcessor (.getProcessor imp)  255)
+    (.fillPolygon
+       ^ij.process.ImageProcessor (.getProcessor imp) 
+       ^java.awt.Polygon (.getPolygon roi)))
+  imp)
+
