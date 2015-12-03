@@ -706,7 +706,7 @@
       (let [new-stack (ij.ImageStack. (get-width imp) (get-height imp))]
         (dotimes [t (get-num-frames imp)]
           (dotimes [z (get-num-slices imp)]
-            (let [n (.getStackIndex imp chan (inc z) (inc t))]
+            (let [n (.getStackIndex imp (inc chan) (inc z) (inc t))]
               (.addSlice new-stack (.getProcessor (.getImageStack imp) n)))))
         (ImagePlus. (str "C" chan "-" (.getTitle imp))
                     new-stack)))))
