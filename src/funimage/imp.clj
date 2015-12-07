@@ -853,8 +853,7 @@
 (defn conj-imps
   "Conj an image to another image's stack."
   [target-stack imp]
-  (zconcat-imps(conj (vec (split-channels target-stack)) imp)))
-  
+  (zconcat-imps(conj (vec (split-channels target-stack)) imp))) 
 
 #_(defn imps-to-rgb
    "Convert a sequence of imps (only first 3 or fewer if less supplied) to RGB."
@@ -946,3 +945,11 @@
       (.add overlay-list roi)
 			(.setOverlay imp overlay-list)))
   imp); could add undo
+
+(defn autocontrast
+  "Auto contrast. This is done the lazy way"
+  [imp]
+  (ij.IJ/run imp "Enhance Contrast" "saturated=0.35")
+  imp)
+
+  
