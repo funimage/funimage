@@ -3,3 +3,5 @@
 .project
 .settings/
 /target/
+pom.xml
+/bin/
