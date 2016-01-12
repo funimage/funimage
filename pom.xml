@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.imagej</groupId>
+		<artifactId>pom-imagej</artifactId>
+		<version>14.0.0</version>
+		<relativePath />
+	</parent>
+
+	<artifactId>funimage</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+
+	<name>FunImage</name>
+	<description>Fiji plugin that provides Clojure wrappings of many commonly used functions from ImageJ and ImgLib2.</description>
+	<inceptionYear>2015</inceptionYear>
+
+	<developers>
+		<developer>
+			<id>kharrington</id>
+			<name>Kyle Harrington</name>
+			<email>kharrin3@bidmc.harvard.edu</email>
+			<url>http://kyleharrington.com/</url>
+			<organization>Center for Vascular Biology Research</organization>
+			<organizationUrl>http://cvbr.hms.harvard.edu/</organizationUrl>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Mark Hiner</name>
+			<properties><id>hinerm</id></properties>
+		</contributor>
+	</contributors>
+
+	<scm>
+		<connection>scm:git:git://github.com/imagej/imagej-scripting</connection>
+		<developerConnection>scm:git:git@github.com:funimage/funimage</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/funimage/funimage</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/funimage/funimage/issues</url>
+	</issueManagement>
+
+	<dependencies>
+		<!-- ImageJ dependencies -->
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-common</artifactId>
+		</dependency>
+
+		<!-- ImgLib2 dependencies -->
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+		</dependency>
+
+		<!-- SciJava dependencies -->
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scripting-clojure</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<!--
+					NB: Make Eclipse generate code in a full build; see:
+					http://wiki.eclipse.org/M2E_plugin_execution_not_covered
+					-->
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.mojo</groupId>
+										<artifactId>groovy-maven-plugin</artifactId>
+										<versionRange>1.5</versionRange>
+										<goals>
+											<goal>execute</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnConfiguration>true</runOnConfiguration>
+											<runOnIncremental>false</runOnIncremental>
+										</execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<packageName>funimage</packageName>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<organizationName>Center for Vascular Biology Research</organizationName>
+					<license>apache2</license>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
