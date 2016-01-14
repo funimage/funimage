@@ -9,7 +9,6 @@ script:
 - chmod a+x lein
 - curl -O http://update.imagej.net/bootstrap.js
 - jrunscript bootstrap.js update-force-pristine
-#- mvn clean install -Dimagej.app.directory="$(pwd)" -Ddelete.other.versions=true
 - ./lein pom
 - ./lein jar
 - curl -O https://raw.githubusercontent.com/fiji/fiji/7f13f66968a9d4622e519c8aae04786db6601314/bin/upload-site-simple.sh
