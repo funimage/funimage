@@ -1,7 +1,7 @@
 language: java
 #lein: lein2
 jdk:
-- oraclejdk8
+#- oraclejdk8
 - oraclejdk7
 - openjdk7
 install: true
@@ -14,7 +14,7 @@ script:
 - ./lein jar
 - curl -O https://raw.githubusercontent.com/fiji/fiji/7f13f66968a9d4622e519c8aae04786db6601314/bin/upload-site-simple.sh
 - chmod a+x upload-site-simple.sh
-- ./upload-site-simple.sh http://sites.imagej.net/Funimage/ Funimage
+- ./upload-site-simple.sh Funimage Funimage
 env:
   matrix:
     secure: DSnbGror7WZow5+4Ofr6A6+d28JjKdizF/o0rrqvgNZ2wO2xifcqbZ4v/3yf2siIazyLK8UDcR2PzIyL7WOArehbSTDWXr8Xj1aer2r7gUmu4GIMNxabtn+mBDwHNtsiiOeue7VhkI6NQpKD/SG6AqY6dkOYoszI7A5qXsDcJA0YOgzUvQrCxttb4aOMqJVL2HAJR++dRt2rWDiKXu7lygf+/ZggmMPjYGXQdtuK3B/CPHCZw3yv3LznFvcsayf9jjywODUeeIQfdFksQkUZ2n61o6QFl6SE8ok5LudIXjOrQvEKlCYQ5832/D1hb/PS7ZUync9T0GXhFb6ecicFjpvn61Zyz59zbcVH/uE7fyBhwCV+UQwLQ4EGamF0gXq9cuuzZgaXUZRbbPmibEt203R+sZB9DLhN41gpaLPr9U4Fb0+bh7f3qptC0wp7oMhhDk+p1L8KVLCYyMblcbGzwUKnYhCPYO3YbLk3pngmAfqvd49LJ1w9nbP90fzcnpxqvGzxyEfWef6BZsOGXhLxmNxvABPv2IOHfafzVlWLPcbqQKv7U+oznxMiTQ+SR8pog0/V75N0lMzw6G1axKUF4L3GkC2LNpMiiXKBxtz15ddnb/jnpJqZc6nORze8ZWAcESfzWEdBmCKR5LopGMhuxYGa/LQeJUqkOXskrlG/JVo=
