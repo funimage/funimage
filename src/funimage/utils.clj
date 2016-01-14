@@ -1,11 +1,8 @@
 (ns funimage.utils  
-  (:require [clojure.string :as string])
+  (:use [funimage imagej])
+  (:require [clojure.string :as string]
+            [clojure.pprint :as pprint])
   (:import [java.io File]
-           [ij IJ ImagePlus]
-           [loci.plugins BF]
-           [ij.io FileSaver]
-           [javax.media.j3d Transform3D]
-           [javax.vecmath Vector3f Point3f Quat4f]
            [ij.gui NewImage Toolbar]
            [ij.process ImageProcessor ByteProcessor ImageStatistics]
            
@@ -21,52 +18,41 @@
            [net.imglib2.algorithm.gauss3 Gauss3]
            [net.imglib2.algorithm.dog DifferenceOfGaussian]
            [net.imglib2.view Views]
-           [net.imglib2 Cursor]
-           
-           [ij.gui HistogramWindow]
-           ))
+           [net.imglib2 Cursor]))
 
-(defn get-image-histogram
-  "Display and return the histogram of an image."
-  [img]
-  (let [hw (HistogramWindow. img)]
-    (.show hw)
-    hw))
+(defn construct-op-call
+  "Construct an op-call from OpInfo."
+  [ops op-info]
+  (let [op-call (loop [packs (string/split (.getName op-info) #"\.")
+                       call '(.op ij)]
+                  (if (empty? packs)
+                    (concat call 
+                            (map #(symbol (.getName %)) (.inputs (.cInfo op-info))))
+                    (recur (rest packs)
+                           `(~(symbol (str "." (first packs))) ~call))))]
+    `(defn ~(symbol (str "ops-" (string/replace (.getName op-info) "." "-")))
+       ; Construct a doc string... add type info
+       [& {:keys ~(vec (map #(symbol (.getName %)) (.inputs (.cInfo op-info))))
+           :or ~(apply hash-map (interleave (map #(symbol (.getName %)) (.inputs (.cInfo op-info)))
+                                            (repeat nil)))}]
+       ~op-call)))
 
-(defn imagej-toolbar
-  "Make an ImageJ toolbar. (Needs to be connected to images)"
+(defn regenerate-ops
+  "Regenerate ImagejOps wrappers."
   []
-  (let [f (JFrame.)]
-    (.setSize f 580 80)
-    (let [c (Canvas.)]
-      (.add f c)
-      (let [tool (Toolbar.)
-            g (.getGraphics tool)]
-        (.installStartupTools tool)
-        (let [menubar (JMenuBar.)
-              menu (JMenu. "Menu")
-              toolbar (JMenuItem. "Toobar")]
-          (.setVisible tool true)
-          (.revalidate tool)
-          (.add f tool)
-          (.setVisible f true))
-        tool))))
+  (println "You probably don't mean to do this, doing nothing.")
+  (when false
+    (spit "src/funimage/imagej_ops.clj"
+          (string/replace
+            (with-out-str 
+              (println "(ns funimage.imagej-ops (:use [funimage imagej]))\n")
+              (doseq [op (filter #(.getName %) (.infos (.op ij)))]
+                (pprint/pprint (construct-op-call (.op ij) op))
+                (println)))
+            "clojure.core/defn" "defn"))))
 
-(defn listen-with-toolbar
-  "Register a toolbar to listen to an imageplus."
-  [^Toolbar tb ^ImagePlus imp]
-  (when (.getCanvas imp)
-    (.addMouseListener (.getCanvas imp) tb)))
+;(pprint/pprint (construct-op-call (.op ij) (first (filter #(.getName %) (.infos (.op ij))))))
 
-(defn start-imagej
-  "Start a proper ImageJ session."
-  ([] (start-imagej nil))
-  ([plugins-dir]
-    (when-not (nil? plugins-dir)
-      (System/setProperty "plugins.dir" plugins-dir)); should we setup more?    
-    (let [imagej (ij.ImageJ.)]      
-      (ij.Prefs/load imagej nil)          
-      (ij.Menus/updateImageJMenus)
-      )))
-
-
+; This will load them all to
+#_(doseq [op tmp]
+   (eval (construct-op-call (.op ij) op)))
