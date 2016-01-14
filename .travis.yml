@@ -4,6 +4,7 @@ jdk:
 - oraclejdk8
 - oraclejdk7
 - openjdk7
+install: true
 script:
 - curl -O https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
 - chmod a+x lein
