@@ -1,15 +1,17 @@
-language: clojure
-lein: lein2
+language: java
+#lein: lein2
 jdk:
 - oraclejdk8
 - oraclejdk7
 - openjdk7
 script:
+- curl -O https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+- chmod a+x lein
 - curl -O http://update.imagej.net/bootstrap.js
 - jrunscript bootstrap.js update-force-pristine
 #- mvn clean install -Dimagej.app.directory="$(pwd)" -Ddelete.other.versions=true
-- lein pom
-- lein jar
+- ./lein pom
+- ./lein jar
 - curl -O https://raw.githubusercontent.com/fiji/fiji/7f13f66968a9d4622e519c8aae04786db6601314/bin/upload-site-simple.sh
 - chmod a+x upload-site-simple.sh
 - ./upload-site-simple.sh http://sites.imagej.net/Funimage/ Funimage
