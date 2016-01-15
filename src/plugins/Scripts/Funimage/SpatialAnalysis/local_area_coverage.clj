@@ -2,7 +2,7 @@
 ; @Integer(label="Radius",description="Coverage within a ball of this radius will be analyzed.",value=25) Funimage.SpatialAnalysis.local-area-coverage/density-radius
 ; @OUTPUT ImagePlus Funimage.SpatialAnalysis.local-area-coverage/density-imp
 (ns Funimage.SpatialAnalysis.local-area-coverage
-  (:use [funimage img imp project conversion utils]
+  (:use [funimage img imp project conversion]
         [funimage.segmentation utils imp]
         [funimage.imp calibration roi threshold calculator statistics])
   (:import [net.imglib2.algorithm.neighborhood Neighborhood]
