@@ -2,10 +2,7 @@
   (:require [clojure.string :as string])
   (:import [java.io File]
            [ij IJ]           
-           [loci.plugins BF]
            [ij.io FileSaver]
-           [javax.media.j3d Transform3D]
-           [javax.vecmath Vector3f Point3f Quat4f]
            [ij.gui NewImage]
            [ij.process ImageProcessor ByteProcessor ImageStatistics ImageConverter] 
            
