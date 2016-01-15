@@ -1,14 +1,11 @@
-; @ImagePlus(label="Target image",description="Input image (will be binarized)") segments
-; @Integer(label="Radius",description="Coverage within a ball of this radius will be analyzed.",value=25) density-radius
-; @OUTPUT ImagePlus density-imp
-(ns plugins.Scripts.Funimage.SpatialAnalysis.local-area-coverage
+; @ImagePlus(label="Target image",description="Input image (will be binarized)") Funimage.SpatialAnalysis.local-area-coverage/segments
+; @Integer(label="Radius",description="Coverage within a ball of this radius will be analyzed.",value=25) Funimage.SpatialAnalysis.local-area-coverage/density-radius
+; @OUTPUT ImagePlus Funimage.SpatialAnalysis.local-area-coverage/density-imp
+(ns Funimage.SpatialAnalysis.local-area-coverage
   (:use [funimage img imp project conversion utils]
         [funimage.segmentation utils imp]
         [funimage.imp calibration roi threshold calculator statistics])
-  (:require [clojure.string :as string])  
   (:import [net.imglib2.algorithm.neighborhood Neighborhood]
-           [ij IJ ImagePlus WindowManager]
-           ;[ij.gui WaitForUserDialog PointRoi NewImage PolygonRoi Roi GenericDialog NonBlockingGenericDialog Line]
            [ij.process ImageConverter FloatProcessor ByteProcessor]))
  
 ;Should check if density-radius is less than this
