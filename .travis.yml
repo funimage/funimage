@@ -13,6 +13,7 @@ script:
 - ./lein pom
 - ./lein jar
 - mv target/funimage* jars/
+- mv src/plugins/* plugins/
 - curl -O https://raw.githubusercontent.com/fiji/fiji/7f13f66968a9d4622e519c8aae04786db6601314/bin/upload-site-simple.sh
 - chmod a+x upload-site-simple.sh
 - ./upload-site-simple.sh Funimage Funimage
