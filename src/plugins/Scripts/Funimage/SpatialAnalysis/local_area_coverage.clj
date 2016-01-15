@@ -6,8 +6,7 @@
      '[funimage.segmentation utils imp]
      '[funimage.imp calibration roi threshold calculator statistics])
 
-(let [segments user/segments
-      density-radius (min user/density-radius (max (get-width segments) (get-height segments)))]
+(let [density-radius (min user/density-radius (max (get-width segments) (get-height segments)))]
   (ij.IJ/run segments "Make Binary" "")
   
   (let [rois (imp-to-rois segments )     
