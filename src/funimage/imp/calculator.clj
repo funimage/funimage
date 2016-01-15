@@ -3,10 +3,7 @@
             [clojure.java.io :as io])
   (:import [java.io File]
            [ij IJ ImagePlus ImageStack]
-           [loci.plugins BF]
            [ij.io FileSaver]
-           [javax.media.j3d Transform3D]
-           [javax.vecmath Vector3f Point3f Quat4f]
            [ij.gui NewImage Toolbar Roi]
            [ij.process ImageProcessor ByteProcessor ImageStatistics]
            [ij.measure Calibration]
@@ -16,8 +13,6 @@
            ;[io.scif.img ImgOpener]
            
            [java.util.concurrent Executors]
-           [java.awt Canvas Graphics]
-           [javax.swing JFrame JMenu JMenuBar JMenuItem]
            
            [net.imglib2.img ImagePlusAdapter Img]
            [net.imglib2.img.display.imagej ImageJFunctions]

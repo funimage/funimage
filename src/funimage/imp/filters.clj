@@ -5,16 +5,8 @@
             [clojure.java.io :as io])
   (:import [java.io File]
            [ij IJ ImagePlus ImageStack]
-           [loci.plugins BF]
-           [ij.io FileSaver]
-           [javax.media.j3d Transform3D]
-           [javax.vecmath Vector3f Point3f Quat4f]
            [ij.process ImageProcessor ByteProcessor ImageStatistics FHT ]
-           [ij.measure Calibration]
-           
-           ;[ij.plugin FFT]
-           ;[funimage Fast_FourierTransform]
-           ;[registration3d Fast_FourierTransform]
+           [ij.measure Calibration]                     
            
            [org.jtransforms.fft FloatFFT_3D]
            
@@ -22,8 +14,6 @@
            ;[io.scif.img ImgOpener]
            
            [java.util.concurrent Executors]
-           [java.awt Canvas Graphics]
-           [javax.swing JFrame JMenu JMenuBar JMenuItem]
            
            [net.imglib2.img ImagePlusAdapter Img]
            [net.imglib2.img.display.imagej ImageJFunctions]

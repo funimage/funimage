@@ -1,17 +1,6 @@
 (ns funimage.filters  
   (:require [clojure.string :as string])
-  (:import [java.io File]
-           [ij IJ]
-           [loci.plugins BF]
-           [ij.io FileSaver]
-           [javax.media.j3d Transform3D]
-           [javax.vecmath Vector3f Point3f Quat4f]
-           [ij.gui NewImage]
-           [ij.process ImageProcessor ByteProcessor ImageStatistics]
-           
-           [java.util.concurrent Executors]
-           
-           [net.imglib2.img ImagePlusAdapter Img]
+  (:import [net.imglib2.img ImagePlusAdapter Img]
            [net.imglib2.img.display.imagej ImageJFunctions]
            [net.imglib2.type NativeType]
            [net.imglib2.type.numeric NumericType]
@@ -20,8 +9,9 @@
            [net.imglib2.algorithm.dog DifferenceOfGaussian]
            [net.imglib2.algorithm.fft2 FFTConvolution]
            [net.imglib2.view Views]
-           [net.imglib2 Cursor])
-  (:use [funimage basic]))
+           [net.imglib2 Cursor]
+           [java.util.concurrent Executors])
+  #_(:use [funimage basic]))
 
 (defn gaussian-3d
   "Perform a 3D guassian convolution."
