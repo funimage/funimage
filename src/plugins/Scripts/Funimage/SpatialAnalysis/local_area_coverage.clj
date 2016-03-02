@@ -1,6 +1,6 @@
 ; @ImagePlus(label="Target image",description="Input image (will be binarized)") segments
 ; @Integer(label="Radius",description="Coverage within a ball of this radius will be analyzed.",value=25) density-radius
-; @OUTPUT ImagePlus Funimage.SpatialAnalysis.local-area-coverage/density-imp
+; @OUTPUT ImagePlus density-imp
 
 (use '[funimage img imp project conversion]
      '[funimage.segmentation utils imp]
