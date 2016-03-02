@@ -1,5 +1,9 @@
+; @ImagePlus(label="Target image",description="Input image") imp
+
 (import 'ij.IJ)
 (import 'ij.plugin.frame.RoiManager)
+
+(ij.IJ/setTool "point")
 
 (def dialog (ij.gui.NonBlockingGenericDialog. "Cube labeler (3D)"))
 ;(def add-point-button (java.awt.Button. "Add cube"))
@@ -33,22 +37,22 @@
       (.show rtable "Results")))
 
 (defn set-first-point []
-  (let [roi (.getRoi (ij.IJ/getImage))
+  (let [roi (.getRoi imp)
         bounds (.getBounds roi)
         idx (dec (.getCounter rtable))]
     (.setValue rtable "X1" idx (double (.x bounds)))
     (.setValue rtable "Y1" idx (double (.y bounds)))
-    (.setValue rtable "Z1" idx (double (.getZ (ij.IJ/getImage))))
+    (.setValue rtable "Z1" idx (double (.getZ imp)))
     (.updateResults rtable)
     (.show rtable "Results")))
 
 (defn set-second-point []
-  (let [roi (.getRoi (ij.IJ/getImage))
+  (let [roi (.getRoi imp)
         bounds (.getBounds roi)
         idx (dec (.getCounter rtable))]
     (.setValue rtable "X2" idx (double (.x bounds)))
     (.setValue rtable "Y2" idx (double (.y bounds)))
-    (.setValue rtable "Z2" idx (double (.getZ (ij.IJ/getImage))))
+    (.setValue rtable "Z2" idx (double (.getZ imp)))
     (.updateResults rtable)
     (.show rtable "Results")))
 
@@ -90,8 +94,8 @@
 (.addActionListener save-button 
 	(reify java.awt.event.ActionListener
 		(actionPerformed [_ evt]
-		  (let [filename (.getTitle (ij.IJ/getImage))
-          directory (str (.directory (.getOriginalFileInfo (ij.IJ/getImage))))
+		  (let [filename (.getTitle imp)
+          directory (str (.directory (.getOriginalFileInfo imp)))
           outname (str directory java.io.File/separator 
                        (.substring filename 0 (.lastIndexOf filename ".")) 
                        "_CubeROIs.csv")]
@@ -100,8 +104,3 @@
 
 (.addMessage dialog " ")
 (.showDialog dialog)
-
-(ij.IJ/setTool "point")
-
-
-
