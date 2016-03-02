@@ -3,6 +3,8 @@
 (import 'ij.IJ)
 (import 'ij.plugin.frame.RoiManager)
 
+(def imp (ij.IJ/getImage))
+
 (ij.IJ/setTool "point")
 
 (def dialog (ij.gui.NonBlockingGenericDialog. "Cube labeler (3D)"))
