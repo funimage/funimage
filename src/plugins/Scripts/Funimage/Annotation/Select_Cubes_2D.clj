@@ -112,7 +112,7 @@
                   "c2=" (get-title (second imps))
                   " "
                   "c3=" (get-title (last imps))
-                  " keep"))
+                  #_" keep"))
   #_(ij.plugin.RGBStackMerge/mergeHyperstacks (into-array ij.ImagePlus (take 3 imps)) false)
   #_(let [argmap (apply hash-map args)]
      (.mergeHyperstacks (ij.plugin.RGBStackMerge.) (into-array ij.ImagePlus (take 3 imps)) (or (:keep-source argmap) false))))
@@ -132,7 +132,7 @@
     (show-imp foreground-imp)
     (show-imp background-imp)    
     (show-imp (set-title (imps-to-rgb3 (map (comp convert-to-8bit autocontrast)
-                                            [foreground-imp imp background-imp]))
+                                            [foreground-imp (show-imp (copy-imp imp)) background-imp]))
                         "Mask Visualization"))))
 
 ;; Dialog construction
