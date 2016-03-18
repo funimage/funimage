@@ -60,7 +60,7 @@ Note: this uses threads to avoid some blocking issues."
            t (Thread. 
                (fn []
                  (loop []
-                   (when (every? (map #(.hasNext ^Cursor %) curs))                           
+                   (when (every? #(.hasNext ^Cursor %) curs)                        
                      (doseq [cur curs] (.fwd ^Cursor cur))
                      (apply f curs)
                      (recur)))))]
