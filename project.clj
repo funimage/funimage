@@ -22,7 +22,8 @@
                  ;[net.imglib2/imglib2-ui "2.0.0-beta-29"]
                  ;[net.imglib2/imglib2-realtransform "2.0.0-beta-29"]
                  
-                 [net.imglib2/imglib2-roi "0.4.3-SNAPSHOT"]
+                 ;[net.imglib2/imglib2-roi "0.4.3-SNAPSHOT"]
+                 [net.imglib2/imglib2-roi "0.4.2"]
                  
                  ;[io.scif/scifio "0.25.0"]
                  
