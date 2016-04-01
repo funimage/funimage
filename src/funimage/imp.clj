@@ -30,7 +30,7 @@
 
 (defn open-imp
   "Open an image using bioformats, this returns an array of imageplus's. Return the first, see open-imps to open many imagepluses at once"
-  [filename]    
+  [filename]  
   ^ImagePlus (first (BF/openImagePlus filename)))
 
 #_(defn open-imp

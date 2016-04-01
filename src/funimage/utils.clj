@@ -27,7 +27,8 @@
                        call '(.op ij)]
                   (if (empty? packs)
                     (concat call 
-                            (map #(symbol (.getName %)) (.inputs (.cInfo op-info))))
+                            (map #(symbol (.getName %)) (.inputs (.cInfo op-info)))); getIOType to check for input/output/both, to test for mutable, if it is a computer out comes first, technically mutable
+                    ;; type hinting from .getType
                     (recur (rest packs)
                            `(~(symbol (str "." (first packs))) ~call))))]
     `(defn ~(symbol (str "ops-" (string/replace (.getName op-info) "." "-")))
@@ -36,6 +37,8 @@
            :or ~(apply hash-map (interleave (map #(symbol (.getName %)) (.inputs (.cInfo op-info)))
                                             (repeat nil)))}]
        ~op-call)))
+
+;; Add into ops.*. namespaces
 
 (defn regenerate-ops
   "Regenerate ImagejOps wrappers."
