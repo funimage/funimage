@@ -1,6 +1,8 @@
 funimage
 ========
 
+[![Join the chat at https://gitter.im/funimage/funimage](https://badges.gitter.im/funimage/funimage.svg)](https://gitter.im/funimage/funimage?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Functional Image Processing with ImageJ/FIJI
 
 [![Build Status](https://travis-ci.org/funimage/funimage.svg?branch=master)](https://travis-ci.org/funimage/funimage)
