@@ -24,7 +24,7 @@
         '[ij.plugin.frame RoiManager]
         '[ij.process ImageConverter FloatProcessor ByteProcessor])
 
-(println "Show all steps: " show-all-steps)
+;(println "Show all steps: " show-all-steps)
 
 (defn dilate-erode-filter
   "Filter by dilate then erode."
@@ -242,7 +242,17 @@
                                   clean-nuclei))
 ;(show-imp merged-labels)
 
-#_(def cell-results (analyze-by-label cell-shape (nth channels signal-channel-index)))
+(def cell-results (analyze-by-label cell-shape (nth channels signal-channel-index)))
+
+; Put cell results into result table
+(let [rt (ResultsTable/getResultsTable)]
+ (doseq [cell-res cell-results]
+   (let [cell (second cell-res)         
+         idx (.getCounter rt)]
+     (.setValue rt "CellID" idx (double idx))
+     (doseq [k (keys cell)]        
+       (.setValue rt (name k) (int idx) (double (get cell k))))))
+ (.show rt "Cell Labeler Results"))
 
 #_(when show-all-steps
    (doseq [[k v] cell-results]
@@ -256,3 +266,4 @@
    (show-imp dll4-cells))
 
 (def output-imp (autocontrast (zconcat-imps (concat channels [cell-shape]))))
+
