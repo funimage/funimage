@@ -249,7 +249,7 @@
  (doseq [cell-res cell-results]
    (let [cell (second cell-res)         
          idx (.getCounter rt)]
-     (.setValue rt "CellID" idx (double idx))
+     (.setValue rt "CellID" idx (double (first cell-res)))
      (doseq [k (keys cell)]        
        (.setValue rt (name k) (int idx) (double (get cell k))))))
  (.show rt "Cell Labeler Results"))
