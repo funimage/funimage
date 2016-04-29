@@ -25,6 +25,15 @@
 
 (ij.IJ/run mask "Analyze Particles..." "size=1000-Infinity pixel show=Masks display clear add")
 
+(def roi-info
+  (let [rt (ij.measure.ResultsTable/getResultsTable)]
+    {:num-regions (.getCounter rt)
+     :area (apply + (map #(.getValue rt "Area" %) (range (.getCounter rt))))}))
+  
+;(let [rm (ij.plugin.frame.RoiManager.)
+;      num-rois (.getCount rm)]
+  
+
 (def new-mask (ij.WindowManager/getImage (str "Mask of " (str "C2-" orig-name ))))
 
 (ij.IJ/run new-mask "Invert LUT" "")
@@ -39,6 +48,23 @@
 
 (set! (.changes new-mask) false)
 (.close new-mask)
+
+#_(let [rt (ij.measure.ResultsTable/getResultsTable)]
+   (.setValue rt "Area" 0 (double (:area roi-info)))
+   (.setValue rt "NumRegions" 0 (double (:num-regions roi-info)))
+   (.updateResults rt))
+
+(let [tp (ij.IJ/getTextPanel)
+      rt (.getResultsTable tp)
+      ;tmp (println (clojure.string/join "\t" (.getHeadings rt)))
+      line (.getLine tp 0)
+      [image-name num-intersections] (clojure.string/split line #"\t") 
+      ;image-name (.getValue rt "Image name" 0)
+      ;num-intersections (.getValue rt "Num of intersections" 0)
+      ]
+  (ij.IJ/setColumnHeadings "Image name\tNum of intersections\tArea\tNum regions")
+  (.append (ij.IJ/getTextPanel)
+    (str image-name "\t" num-intersections "\t" (:area roi-info) "\t" (:num-regions roi-info))))
 
 ;(println "saving as" (str (string/replace (string/replace orig-name ".tif" "") " " "_") "_labeled_branches.tif"))
 ;(ij.IJ/saveAsTiff imp (str directory "/" (string/replace orig-name ".tif" "") "_labeled_branches.tif"))
