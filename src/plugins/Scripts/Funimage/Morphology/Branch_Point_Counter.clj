@@ -1,15 +1,23 @@
 ; @ImagePlus(label="Target image",description="Input image") imp
+; @Integer(label="Smoothing steps",description="Number of steps of smoothing",value=0) smoothing-steps
 ; @OUTPUT ImagePlus imp
-
 
 (def orig-name (.getTitle imp))
 (def directory (ij.IJ/getDirectory "image"))
+
+; Requires the plugin from:
+; morphology update site 
+; and
+; http://jvsmicroscope.uta.fi/?q=skeleton_intersections
 
 (ij.IJ/run imp "Subtract Background..." "rolling=25")
 (def channels (ij.plugin.ChannelSplitter/split imp))
 
 (def mask (second channels))
 (.setTitle mask (str "C2-" orig-name ))
+
+(dotimes [step smoothing-steps]
+  (ij.IJ/run mask "Smooth" ""))
 
 (ij.IJ/run mask "Auto Threshold" "method=IsoData white")
 
