@@ -6,15 +6,20 @@
 (def directory (ij.IJ/getDirectory "image"))
 
 ; Requires the plugin from:
-; morphology update site 
+; morphology update site
 ; and
 ; http://jvsmicroscope.uta.fi/?q=skeleton_intersections
 
-(ij.IJ/run imp "Subtract Background..." "rolling=25")
-(def channels (ij.plugin.ChannelSplitter/split imp))
 
-(def mask (second channels))
-(.setTitle mask (str "C2-" orig-name ))
+(if (= (.getType imp) ij.ImagePlus/COLOR_RGB)
+  (do (ij.IJ/run imp "8-bit" "")
+    (def mask imp))
+  (do (def channels (ij.plugin.ChannelSplitter/split imp))
+
+    (def mask (second channels))
+    (.setTitle mask (str "C2-" orig-name ))))
+
+(ij.IJ/run mask "Subtract Background..." "rolling=25")
 
 (dotimes [step smoothing-steps]
   (ij.IJ/run mask "Smooth" ""))
@@ -29,10 +34,10 @@
   (let [rt (ij.measure.ResultsTable/getResultsTable)]
     {:num-regions (.getCounter rt)
      :area (apply + (map #(.getValue rt "Area" %) (range (.getCounter rt))))}))
-  
+
 ;(let [rm (ij.plugin.frame.RoiManager.)
 ;      num-rois (.getCount rm)]
-  
+
 
 (def new-mask (ij.WindowManager/getImage (str "Mask of " (str "C2-" orig-name ))))
 
@@ -58,7 +63,7 @@
       rt (.getResultsTable tp)
       ;tmp (println (clojure.string/join "\t" (.getHeadings rt)))
       line (.getLine tp 0)
-      [image-name num-intersections] (clojure.string/split line #"\t") 
+      [image-name num-intersections] (clojure.string/split line #"\t")
       ;image-name (.getValue rt "Image name" 0)
       ;num-intersections (.getValue rt "Num of intersections" 0)
       ]
