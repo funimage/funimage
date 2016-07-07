@@ -19,7 +19,7 @@
 (defn cursor-set-val
   "Get the value of a numeric (RealType) cursor."
   [^Cursor cur val]
-  (.set ^net.imglib2.type.numeric.RealType (.get cur)) val)
+  (.set ^net.imglib2.type.numeric.RealType (.get cur) val))
 
 (defn cursor-set-byte-val
   "Get the value of a numeric (RealType) cursor."
@@ -73,5 +73,16 @@
   (.div
     ^net.imglib2.type.numeric.RealType (.get cur1)
     ^net.imglib2.type.numeric.RealType (.get cur2)))
+
+(defn cursor-sum-neighborhood
+  "Sum a neighborhood"
+  [nbrhood]
+  (loop [sum 0
+         cur ^net.imglib2.Cursor (.cursor nbrhood)]
+    (if (.hasNext cur)
+      (do (.fwd cur)
+        (recur (+ sum (.get ^net.imglib2.type.numeric.integer.UnsignedByteType (.get cur)))
+              cur))
+      sum)))
 
 ; Consider a macro that would convert from the usual math functions to the cursor math functions

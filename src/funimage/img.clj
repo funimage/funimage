@@ -17,19 +17,44 @@
            [net.imglib2.algorithm.binary Thresholder]
            ))
 
+(defn show-img
+  "Display an Img."
+  [img]
+  (net.imglib2.img.display.imagej.ImageJFunctions/show img))
+
+(defn copy-img
+  "Create a copy of an img."
+  [img]
+  (.copy img))
+
+(defn create-img-like
+  "Create an Img like the input."
+  [img]
+  (.create (.factory img)
+    img
+    (.firstElement img)))
+
+(defn get-img-width
+  [img]
+  (.dimension img 0))
+
+(defn get-img-height
+  [img]
+  (.dimension img 1))
+
 (defn get-img-type
   "Return the class type of an image."
   [^Img img]
-  (net.imglib2.util.Util/getTypeFromInterval img))  
+  (net.imglib2.util.Util/getTypeFromInterval img))
 
 (defn map-imgs
-   "Walk all images (as cursors) applying f at each step. 
+   "Walk all images (as cursors) applying f at each step.
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion
 Note: this uses threads to avoid some blocking issues."
    ([f img1]
-     (let [cur1 (.cursor ^Img img1)       
-           t (Thread. 
+     (let [cur1 (.cursor ^Img img1)
+           t (Thread.
                (fn []
                  (loop []
                    (when (.hasNext ^Cursor cur1)
@@ -42,7 +67,7 @@ Note: this uses threads to avoid some blocking issues."
    ([f img1 img2]
      (let [cur1 (.cursor ^Img img1)
            cur2 (.cursor ^Img img2)
-           t (Thread. 
+           t (Thread.
                (fn []
                  (loop []
                    (when (and (.hasNext ^Cursor cur1)
@@ -57,10 +82,10 @@ Note: this uses threads to avoid some blocking issues."
    ([f img1 img2 & imgs]
      (let [imgs (concat [img1 img2] imgs)
            curs (map #(.cursor ^Img %) imgs)
-           t (Thread. 
+           t (Thread.
                (fn []
                  (loop []
-                   (when (every? #(.hasNext ^Cursor %) curs)                        
+                   (when (every? #(.hasNext ^Cursor %) curs)
                      (doseq [cur curs] (.fwd ^Cursor cur))
                      (apply f curs)
                      (recur)))))]
@@ -70,7 +95,7 @@ Note: this uses threads to avoid some blocking issues."
 
 ; Nonthreaded version
 #_(defn map-imgs
-   "Walk all images (as cursors) applying f at each step. 
+   "Walk all images (as cursors) applying f at each step.
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion"
    ([f img1]
@@ -96,7 +121,7 @@ If you have an ImagePlus, then use funimage.conversion"
      (let [imgs (concat [img1 img2] imgs)
            curs (map #(.cursor ^Img %) imgs)]
        (loop []
-         (when (every? (map #(.hasNext ^Cursor %) curs))                           
+         (when (every? (map #(.hasNext ^Cursor %) curs))
            (doseq [cur curs] (.fwd ^Cursor cur))
            (apply f curs)
            (recur)))
@@ -105,10 +130,10 @@ If you have an ImagePlus, then use funimage.conversion"
 (defn replace-img
   "Replace img1 with img2"
   [img1 img2]
-  (second (map-imgs 
+  (second (map-imgs
             (fn [^Cursor cur1 ^Cursor cur2] (.set (.get cur2) (.get cur1)))
             img2 img1)))
-    
+
 (defn subtract-img
   "Subtract the second image from the first (destructive)."
   [img1 img2]
@@ -126,7 +151,7 @@ If you have an ImagePlus, then use funimage.conversion"
 (defn scale-img
   "Scale the image."
   [img scalar]
-  (first (map-imgs 
+  (first (map-imgs
            #(cursor-set-val (* (cursor-get-val %) scalar))
            img)))
 
@@ -138,16 +163,16 @@ If you have an ImagePlus, then use funimage.conversion"
      (let [f-min (float low)
            f-max (float high)]
        (first (map-imgs
-                (fn [^Cursor cur] (.set (.get cur) 
+                (fn [^Cursor cur] (.set (.get cur)
                                     (if (> (.getRealFloat (.get cur)) threshold) f-max f-min)))
                 img)))))
 
-(defn threshold-img 
+(defn threshold-img
   "Binarize an image about a threshold"
   [img threshold]
-  (Thresholder/threshold img 
-                         (let [tval (.copy (get-img-type img))] 
-                           (.set tval threshold) 
+  (Thresholder/threshold img
+                         (let [tval (.copy (get-img-type img))]
+                           (.set tval threshold)
                            tval)
                          true
                          1))
@@ -175,12 +200,12 @@ If you have an ImagePlus, then use funimage.conversion"
        (doseq [el rep-dim] (print el " ")) (println)
        (doseq [el (image-dimensions subimg)] (print el " ")) (println)
        (dotimes [k 2] (print (.min subimg k) " ")) (println )
-       (dotimes [k 2] (print (.max subimg k) " ")) (println) 
+       (dotimes [k 2] (print (.max subimg k) " ")) (println)
        (loop []
          (when (.hasNext ^Cursor cur)
            (.fwd ^Cursor cur)
            (.localize ^Cursor cur ^longs pos)
-           (.setPosition ^RandomAccess ra 
+           (.setPosition ^RandomAccess ra
               ^longs pos)
            (.set (.get ra) (.get (.get cur)))
            (recur))))
@@ -195,11 +220,11 @@ locations outside these points are assigned fill-value"
   (let [location (float-array [0 0 0])
         f-fv (float fill-value)]
     (first (map-imgs
-             (fn [^Cursor cur]               
+             (fn [^Cursor cur]
                (.localize cur location)
                (when (or (< (first location) bx) (< (second location) by) (< (last location) bz)
                          (> (first location) tx) (> (second location) ty) (> (last location) tz))
-                 (.set (.get cur) 
+                 (.set (.get cur)
                    f-fv)))
              img))))
 
@@ -213,8 +238,24 @@ Rectangle only"
           dest ^RandomAccessibleInterval (Views/interval dest interval)
           center ^Cursor (.cursor (Views/iterable dest))
           shape ^RectangleShape (RectangleShape. radius false)]
-      (doseq [^Neighborhood local-neighborhood (.neighborhoods shape source)] 
+      (doseq [^Neighborhood local-neighborhood (.neighborhoods shape source)]
         (do (.fwd center)
           (f center local-neighborhood)))
       dest)))
 
+(defn neighborhood-map-img-to-center-periodic
+  "Do a neighborhood walk over an imglib2 img.
+Rectangle only"
+  ([f radius source dest]
+    (let [source (net.imglib2.view.Views/interval (net.imglib2.view.Views/extendPeriodic source) dest) ;^net.imglib2.view.ExtendedRandomAccessibleInterval
+          center ^net.imglib2.Cursor (.cursor (net.imglib2.view.Views/iterable dest))
+          shape ^net.imglib2.algorithm.neighborhood.RectangleShape (net.imglib2.algorithm.neighborhood.RectangleShape. radius false)
+          local-neighborhood ^net.imglib2.algorithm.neighborhood.Neighborhood (.neighborhoods shape ^net.imglib2.RandomAccessibleInterval source)
+          neighborhood-cursor ^net.imglib2.Cursor (.cursor local-neighborhood)]
+      (loop []
+        (when (.hasNext ^net.imglib2.Cursor center)
+          (.fwd ^net.imglib2.Cursor center)
+          (.fwd ^net.imglib2.Cursor neighborhood-cursor) 
+          (f center ^net.imglib2.algorithm.neighborhood.RectangleNeighborhoodUnsafe (.get ^net.imglib2.Cursor neighborhood-cursor))
+          (recur)))
+      dest)))
