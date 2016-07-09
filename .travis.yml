@@ -5,6 +5,7 @@ install: true
 script:
 - curl -O https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
 - chmod a+x lein
+- lein test
 - curl -O http://update.imagej.net/bootstrap.js
 - jrunscript bootstrap.js update-force-pristine
 - ./lein pom
