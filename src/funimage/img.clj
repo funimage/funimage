@@ -1,8 +1,9 @@
 ; This is the namespace for imglib2 img's (see imp for ImagePlus)
 (ns funimage.img
-  (:use [funimage.img cursor])
+  ;(:use [funimage.img cursor])
   (:require [clojure.string :as string]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [funimage.img.cursor :as cursor])
   (:import [net.imglib2.algorithm.neighborhood Neighborhood RectangleShape]
            [net.imglib2.util Intervals]
            [net.imglib2.img ImagePlusAdapter Img]
@@ -17,37 +18,44 @@
            [net.imglib2.algorithm.binary Thresholder]
            ))
 
-(defn show-img
+(defn show
   "Display an Img."
-  [img]
+  [^Img img]
   (net.imglib2.img.display.imagej.ImageJFunctions/show img))
 
-(defn copy-img
+(defn copy
   "Create a copy of an img."
-  [img]
-  (.copy img))
+  [^Img img]
+  ^Img (.copy img))
 
 (defn create-img-like
   "Create an Img like the input."
-  [img]
-  (.create (.factory img)
-    img
-    (.firstElement img)))
+  [^Img img]
+  ^Img (.create (.factory img)
+         img
+         (.firstElement img)))
 
-(defn get-img-width
-  [img]
+(defn get-size-dimension
+  "Return the size along the specified dimension."
+  [^Img img d]
+  (.dimension img d))
+
+(defn get-width
+  "Return the width of the img."
+  [^Img img]
   (.dimension img 0))
 
-(defn get-img-height
-  [img]
+(defn get-height
+  "Return the height of the img."
+  [^Img img]
   (.dimension img 1))
 
-(defn get-img-type
+(defn get-type
   "Return the class type of an image."
   [^Img img]
   (net.imglib2.util.Util/getTypeFromInterval img))
 
-(defn map-imgs
+(defn map
    "Walk all images (as cursors) applying f at each step.
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion
@@ -127,64 +135,43 @@ If you have an ImagePlus, then use funimage.conversion"
            (recur)))
        imgs)))
 
-(defn replace-img
+(defn replace
   "Replace img1 with img2"
-  [img1 img2]
-  (second (map-imgs
+  [^Img img1 ^Img img2]
+  (second (map
             (fn [^Cursor cur1 ^Cursor cur2] (.set (.get cur2) (.get cur1)))
             img2 img1)))
 
-(defn subtract-img
+(defn subtract
   "Subtract the second image from the first (destructive)."
-  [img1 img2]
-  (first (map-imgs
-           cursor-sub
-           img1 img2)))
+  [^Img img1 ^Img img2]
+  (first (map cursor/sub img1 img2)))
 
-(defn elmul-img
+(defn elmul
   "Subtract the second image from the first (destructive)."
-  [img1 img2]
-  (first (map-imgs
-           cursor-mul
-           img1 img2)))
+  [^Img img1 ^Img img2]
+  (first (map cursor/mul img1 img2)))
 
-(defn scale-img
+(defn scale
   "Scale the image."
-  [img scalar]
-  (first (map-imgs
-           #(cursor-set-val (* (cursor-get-val %) scalar))
-           img)))
+  [^Img img scalar]
+  (first (map #(cursor/set-val (* (cursor/get-val %) scalar)) img)))
 
-#_(defn threshold-img
-   "Convert an image into a binary one about a threshold."
-   ([img threshold]
-     (threshold-img img threshold 0 255))
-   ([img threshold low high]
-     (let [f-min (float low)
-           f-max (float high)]
-       (first (map-imgs
-                (fn [^Cursor cur] (.set (.get cur)
-                                    (if (> (.getRealFloat (.get cur)) threshold) f-max f-min)))
-                img)))))
-
-(defn threshold-img
+(defn threshold
   "Binarize an image about a threshold"
-  [img threshold]
+  [^Img img threshold]
   (Thresholder/threshold img
-                         (let [tval (.copy (get-img-type img))]
+                         (let [tval (.copy (get-type img))]
                            (.set tval threshold)
                            tval)
                          true
                          1))
 
-(defn sum-img
+(defn sum
   "Take the sum of all pixel values in an image."
-  [img]
+  [^Img img]
   (let [sum (atom 0)]
-    (map-imgs
-      (fn [^Cursor cur]
-        (swap! sum + (cursor-get-val cur)))
-      img)
+    (map (fn [^Cursor cur] (swap! sum + (cursor/get-val cur))) img)
     @sum))
 
 #_(defn replace-subimg
@@ -216,20 +203,19 @@ If you have an ImagePlus, then use funimage.conversion"
 (bx,by,bz) - 'bottom' point. these are the small values. exclusive
 (tx,ty,tz) - 'top' point. these are the big values. exclusive
 locations outside these points are assigned fill-value"
-  [img bx by bz tx ty tz fill-value]; should take array of locations to generalize to N-D
+  [^Img img bx by bz tx ty tz fill-value]; should take array of locations to generalize to N-D
   (let [location (float-array [0 0 0])
         f-fv (float fill-value)]
-    (first (map-imgs
-             (fn [^Cursor cur]
-               (.localize cur location)
-               (when (or (< (first location) bx) (< (second location) by) (< (last location) bz)
-                         (> (first location) tx) (> (second location) ty) (> (last location) tz))
-                 (.set (.get cur)
-                   f-fv)))
+    (first (map (fn [^Cursor cur]
+                  (.localize cur location)
+                  (when (or (< (first location) bx) (< (second location) by) (< (last location) bz)
+                            (> (first location) tx) (> (second location) ty) (> (last location) tz))
+                    (.set (.get cur)
+                      f-fv)))
              img))))
 
 
-(defn neighborhood-map-img-to-center
+(defn neighborhood-map-to-center
   "Do a neighborhood walk over an imglib2 img.
 Rectangle only"
   ([f radius source dest]
@@ -243,7 +229,7 @@ Rectangle only"
           (f center local-neighborhood)))
       dest)))
 
-(defn neighborhood-map-img-to-center-periodic
+(defn periodic-neighborhood-map-to-center
   "Do a neighborhood walk over an imglib2 img.
 Rectangle only"
   ([f radius source dest]
