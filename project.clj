@@ -1,4 +1,4 @@
-(defproject funimage/funimage "0.1.89"
+(defproject funimage "0.1.90"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -20,9 +20,9 @@
                  ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
                  ["ome maven" "http://artifacts.openmicroscopy.org/artifactory/maven/"]
                  ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]
-                 ["clojars" {:url "http://clojars.org/repo/"
-                             :username :env
-                             :password :env}]]
+                 ["clojars2" {:url "http://clojars.org/repo/"
+                             :username :env/LEIN_USERNAME
+                             :password :env/LEIN_PASSWORD}]]
   :jvm-opts ["-Xmx32g" "-server"
              ;"-javaagent:/Users/kyle/.m2/repository/net/imagej/ij1-patcher/0.12.3/ij1-patcher-0.12.3.jar=init"
              #_"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:8000"] 

@@ -1,5 +1,5 @@
 (ns funimage.imp.threshold
-  (:use [funimage imp conversion img])
+  (:use [funimage imp conversion])
   (:require [clojure.string :as string]
             [clojure.java.io :as io])
   (:import [java.io File]
