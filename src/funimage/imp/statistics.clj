@@ -9,18 +9,7 @@
            [ij.measure Calibration]
            [ij.plugin Duplicator]
            
-           [ij.io Opener]
-           
-           
-           [net.imglib2.img ImagePlusAdapter Img]
-           [net.imglib2.img.display.imagej ImageJFunctions]
-           [net.imglib2.type NativeType]
-           [net.imglib2.type.numeric NumericType ARGBType]
-           [net.imglib2.type.numeric.real FloatType]
-           [net.imglib2.algorithm.gauss3 Gauss3]
-           [net.imglib2.algorithm.dog DifferenceOfGaussian]
-           [net.imglib2.view Views IntervalView]
-           [net.imglib2 Cursor RandomAccess])
+           [ij.io Opener])
   (:use [funimage imp]))
 
 (defn get-available-measurements
