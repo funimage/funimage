@@ -24,6 +24,21 @@
                  ["clojars2" {:url "http://clojars.org/repo/"
                              :username :env/LEIN_USERNAME
                               :password :env/LEIN_PASSWORD}]]
+  :deploy-repositories [["releases" {:url "http://maven.imagej.net/content/repositories/releases"
+                                     ;; Select a GPG private key to use for
+                                     ;; signing. (See "How to specify a user
+                                     ;; ID" in GPG's manual.) GPG will
+                                     ;; otherwise pick the first private key
+                                     ;; it finds in your keyring.
+                                     ;; Currently only works in :deploy-repositories
+                                     ;; or as a top-level (global) setting.
+                                     :username :env/CI_DEPLOY_USERNAME
+                                     :password :env/CI_DEPLOY_PASSWORD}]
+                        ["snapshots" {:url "http://maven.imagej.net/content/repositories/snapshots"
+                                      :username :env/CI_DEPLOY_USERNAME
+                                      :password :env/CI_DEPLOY_PASSWORD
+                                      :sign-releases false}]]
+  
   :jvm-opts ["-Xmx32g" "-server"
              ;"-javaagent:/Users/kyle/.m2/repository/net/imagej/ij1-patcher/0.12.3/ij1-patcher-0.12.3.jar=init"
              #_"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:8000"] 
