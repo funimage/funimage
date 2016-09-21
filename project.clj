@@ -36,7 +36,8 @@
                                      :password :env/CI_DEPLOY_PASSWORD}]
                         ["snapshots" {:url "http://maven.imagej.net/content/repositories/snapshots"
                                       :username :env/CI_DEPLOY_USERNAME
-                                      :password :env/CI_DEPLOY_PASSWORD}]]
+                                      :password :env/CI_DEPLOY_PASSWORD
+                                      :sign-releases false}]]
   
   :jvm-opts ["-Xmx32g" "-server"
              ;"-javaagent:/Users/kyle/.m2/repository/net/imagej/ij1-patcher/0.12.3/ij1-patcher-0.12.3.jar=init"
