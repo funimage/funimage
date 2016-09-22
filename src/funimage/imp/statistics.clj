@@ -15,9 +15,16 @@
 (defn get-available-measurements
   "Return a sequence of keywords corresponding to available measurements."
   []
-  #{:add-to-overlay  :area  :area-fraction  :center-of-mass  :centroid  :circularity  :ellipse  :feret  :integrated-density  :invert-y  
+  #{:area  :area-fraction  :center-of-mass  :centroid  :circularity  :ellipse  :feret  :integrated-density  :invert-y  
    :kurtosis  :labels  :limit  :max-standards  :mean  :median  :min-max  :mode  :nan-empty-cells  :perimeter  :rect  
    :scientific-notation  :shape-descriptors  :skewness  :slice  :stack-position  :std-dev})
+; :add-to-overlay
+
+(defn enable-measurements
+  "Enable the list of measurements."
+  [to-enable]
+  (ij.IJ/run "Set Measurements..." (str "redirect=None decimal=3 " (string/join " " 
+                                                                                (map #(str (name %)) to-enable))))) 
 
 (defn get-image-statistics
   "Return a map of image statistics."
