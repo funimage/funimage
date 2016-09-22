@@ -33,7 +33,8 @@
                                      ;; Currently only works in :deploy-repositories
                                      ;; or as a top-level (global) setting.
                                      :username :env/CI_DEPLOY_USERNAME
-                                     :password :env/CI_DEPLOY_PASSWORD}]
+                                     :password :env/CI_DEPLOY_PASSWORD
+                                     :sign-releases false}]
                         ["snapshots" {:url "http://maven.imagej.net/content/repositories/snapshots"
                                       :username :env/CI_DEPLOY_USERNAME
                                       :password :env/CI_DEPLOY_PASSWORD
