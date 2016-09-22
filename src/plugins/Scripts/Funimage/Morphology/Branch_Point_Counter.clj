@@ -4,6 +4,8 @@
 
 ;(require '[funimage.imp :as ij1])
 
+(ij.IJ/run "Options..." "iterations=1 count=1 black")
+
 (def orig-name (.getTitle imp))
 (def directory (ij.IJ/getDirectory "image"))
 
