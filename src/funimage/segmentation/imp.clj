@@ -1,6 +1,6 @@
 (ns funimage.segmentation.imp
  (:use [funimage imp]
-       [funimage.imp threshold calculator roi]
+       [funimage.imp calculator roi]
        [funimage.segmentation utils])
  (:require [clojure.string :as string])
  (:import [ij IJ ImagePlus WindowManager]
@@ -241,27 +241,48 @@ You need to run analyze particles first."
           #_(println k result-idx))))
     new-imp))
 
-(defn color-code-rois
-  "Return an imp with segments labeled based on a measure.
+#_(defn color-code-rois
+   "Return an imp with segments labeled based on a measure.
 You need to run analyze particles first."
-  [imp roi-maps key-fn]
-  (let [new-imp #_(copy-imp imp)
-        (create-imp :title (str (name key-fn) "_" (get-title imp))
-                    :type "32-bit"
-                    :width (get-width imp)
-                    :height (get-height imp))]
-    (dotimes [k (count roi-maps)]; This can be a for now
-      (let [roi-map (nth roi-maps k)
-            roi (:roi roi-map)
-            bounds (.getBounds roi)
-            v (key-fn roi-map)]
-        ;(set-fill-value new-imp v)        
-        (.setValue ^ij.process.ImageProcessor (.getProcessor new-imp) v)
-        (.setColor ^ij.process.ImageProcessor (.getProcessor new-imp) v)
-        (.fillPolygon
-          ^ij.process.ImageProcessor (.getProcessor new-imp)
-          ^java.awt.Polygon (.getPolygon roi))))
-    new-imp))
+   [imp roi-maps key-fn]
+   (let [new-imp #_(copy-imp imp)
+         (create-imp :title (str (name key-fn) "_" (get-title imp))
+                     :type "32-bit"
+                     :width (get-width imp)
+                     :height (get-height imp))]
+     (dotimes [k (count roi-maps)]; This can be a for now
+       (let [roi-map (nth roi-maps k)
+             roi (:roi roi-map)
+             bounds (.getBounds roi)
+             v (key-fn roi-map)]
+         ;(set-fill-value new-imp v)        
+         (.setValue ^ij.process.ImageProcessor (.getProcessor new-imp) v)
+         (.setColor ^ij.process.ImageProcessor (.getProcessor new-imp) v)
+         (.fillPolygon
+           ^ij.process.ImageProcessor (.getProcessor new-imp)
+           ^java.awt.Polygon (.getPolygon roi))))
+     new-imp))
+
+(defn color-code-rois
+   "Return an imp with segments labeled based on a measure.
+You need to run analyze particles first."
+   [imp rois roi-fn]
+   (let [new-imp #_(copy-imp imp)
+         (create-imp :title (str (get-title imp) "_ColorCoded")
+                     :type "32-bit"
+                     :width (get-width imp)
+                     :height (get-height imp))]
+     ;(dotimes [k (count roi-maps)]; This can be a for now
+     (doseq [roi rois]
+       (let [bounds (.getBounds roi)
+             v (roi-fn roi)]
+         ;(set-fill-value new-imp v)        
+         (.setValue ^ij.process.ImageProcessor (.getProcessor new-imp) v)
+         ;(.setColor ^ij.process.ImageProcessor (.getProcessor new-imp) v)
+         (.fillPolygon
+           ^ij.process.ImageProcessor (.getProcessor new-imp)
+           ^java.awt.Polygon (.getPolygon roi))))
+     new-imp))
 
 ; color coded legend  with histogram
 ; density of neighboring particles

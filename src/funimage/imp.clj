@@ -73,12 +73,14 @@
 (defn save-imp
   "Save an image."
   [imp filename]
-  (IJ/save ^ImagePlus imp ^string filename))
+  (IJ/save ^ImagePlus imp ^string filename)
+  imp)
 
 (defn save-imp-as-tiff
   "Save an image as a tiff."
   [imp filename]
-  (IJ/saveAsTiff ^ImagePlus imp ^string filename))
+  (IJ/saveAsTiff ^ImagePlus imp ^string filename)
+  imp)
 
 (defn imp-dimensions
   "Return the dimensions of an image."
