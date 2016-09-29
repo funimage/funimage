@@ -5,11 +5,9 @@
          '[funimage.segmentation.imp :as ij1seg]
          '[funimage.imp.statistics :as ij1stats])
 
-
 (when-not (ij.IJ/getInstance)
   (def filename "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish.tif")
   (def imp (ij1/open-imp filename)))
-
 
 (ij.IJ/run imp "8-bit" "")
 
@@ -323,4 +321,4 @@
   (let [imp-cc (ij1/autocontrast (ij1seg/color-code-rois imp rois (partial measure-fn imp)))]    
     (ij.IJ/run imp-cc "Fire" "")
     (ij1/save-imp-as-tiff (ij1/show-imp (ij1/set-title imp-cc (name measure-name)))
-                          (str "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish_" (name measure-name) ".tif"))))
+                          (str (.substring img-filename 0 (- (.length img-filename) 4)) "_" (name measure-name) ".tif"))))
