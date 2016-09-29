@@ -321,4 +321,5 @@
   (let [imp-cc (ij1/autocontrast (ij1seg/color-code-rois imp rois (partial measure-fn imp)))]    
     (ij.IJ/run imp-cc "Fire" "")
     (ij1/save-imp-as-tiff (ij1/show-imp (ij1/set-title imp-cc (name measure-name)))
-                          (str (.substring img-filename 0 (- (.length img-filename) 4)) "_" (name measure-name) ".tif"))))
+                          (let [img-filename (.fileName (.getFileInfo imp))]
+                            (str (.substring img-filename 0 (- (.length img-filename) 4)) "_" (name measure-name) ".tif")))))
