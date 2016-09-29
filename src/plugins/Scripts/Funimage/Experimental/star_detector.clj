@@ -6,8 +6,10 @@
          '[funimage.imp.statistics :as ij1stats])
 
 ;(def filename "/Users/kharrington/Data/Sanchez_Alicia/30_no amp.tif")
-;(def filename "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish.tif")
-;(def imp (ij1/open-imp filename))
+
+(when-not (ij.IJ/getInstance)
+  (def filename "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish.tif")
+  (def imp (ij1/open-imp filename)))
 
 (ij.IJ/run imp "8-bit" "")
 
@@ -21,9 +23,28 @@
   (ij.IJ/run imp "Clear Outside" "")
   (ij1/set-roi imp nil))
 
-; Load a ROI for testing
-(def roi-filename "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish_plate.roi")
-(def roi ^OvalRoi (ij.io.RoiDecoder/open roi-filename))
+(if (ij.IJ/getInstance)
+  ; Get a ROI from UI if we're in IJ
+  (let [dialog (ij.gui.NonBlockingGenericDialog. "Select a ROI")]
+    (ij.IJ/setTool "oval")
+    (.addMessage dialog "Select a ROI")
+    (.showDialog dialog)
+
+    ; Manual blocking for the dialog to complete
+    (loop []
+      (Thread/sleep 100)
+      (when-not (or (.wasCanceled dialog)
+                    (.wasOKed dialog)
+                    (.windowClosed dialog))
+        (recur)))
+    (def roi-filename (let [img-filename (.fileName (.getFileInfo imp))]
+                        (str (.substring img-filename 0 (- (.length img-filename) 4))
+                             "_plate.roi")))
+    (def roi (ij1/get-roi imp))
+    (.write (ij.io.RoiEncoder. roi-filename) roi))
+  ; Load a ROI for testing
+  (let [roi-filename "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish_plate.roi"]
+    (def roi ^OvalRoi (ij.io.RoiDecoder/open roi-filename))))
 
 ; Interactive ROI selection, save ROI when done
 ; Could check if saved ROI exists, ask whether to load ROI or select a new one
