@@ -26,6 +26,24 @@
   (ij.IJ/run "Set Measurements..." (str "redirect=None decimal=3 " (string/join " " 
                                                                                 (map #(str (name %)) to-enable))))) 
 
+(defn get-polygon-area
+  "Return the area of a polygon."
+  [p]
+  (if (nil? p)
+    Double/NaN
+    (let [carea (atom 0)]
+      (dotimes [i (.npoints p)]
+        (let [iminus1 (if (< (dec i) 0)
+                        (dec (.npoints p))
+                        (dec i))]
+          (reset! carea
+                 (+ @carea
+                    (* (+ (aget (.xpoints p) i)
+                          (aget (.xpoints p) iminus1))
+                       (- (aget (.ypoints p) i)
+                          (aget (.ypoints p) iminus1)))))))
+      (java.lang.Math/abs (/ @carea 2.0)))))
+
 (defn get-image-statistics
   "Return a map of image statistics."
   [^ImagePlus imp & args]
@@ -60,6 +78,16 @@
                        (= k :slice) ij.measure.Measurements/SLICE
                        (= k :stack-position) ij.measure.Measurements/STACK_POSITION
                        (= k :std-dev) ij.measure.Measurements/STD_DEV)))
+        measurement-options (if measurement-options measurement-options 0)
+        measurement-options (cond (and (contains? argmap :solidity) 
+                                       (contains? argmap :area))
+                                  (+ measurement-options ij.measure.ResultsTable/SOLIDITY)
+                                  (and (contains? argmap :solidity) 
+                                       (not (contains? argmap :area)))
+                                  (+ measurement-options ij.measure.ResultsTable/SOLIDITY
+                                     ij.measure.Measurements/AREA)
+                                  :else
+                                  measurement-options)
         ^ij.process.ImageStatistics stats (ij.process.ImageStatistics/getStatistics (.getProcessor imp) measurement-options (.getCalibration imp))]
     {:angle (.angle stats)
      :area (.area stats)
@@ -71,6 +99,7 @@
      :circularity (if (.getRoi imp)
                     (* 4.0 java.lang.Math/PI (/ (.area stats) (apply * (repeat 2 (when (.getRoi imp) (.getLength ^ij.gui.Roi (.getRoi imp)))))))
                     1) 
+     :convex-area (when (get-roi imp) (get-polygon-area (.getConvexHull (get-roi imp))))
      ;:cal (.cal stats); should probably expand calibration
      :dmode (.dmode stats)
      ;:height (.height stats)
@@ -98,6 +127,9 @@
      :roi-x (.roiX stats)
      :roi-y (.roiY stats)
      :skewness (.skewness stats)
+     :solidity (when (get-roi imp)
+                 (/ (.pixelCount stats)
+                    (get-polygon-area (.getConvexHull (get-roi imp)))))
      ;:stack-statistics? (.stackStatistics stats)
      :std-dev (.stdDev stats)
      :uncalibrated-mean (.umean stats)
