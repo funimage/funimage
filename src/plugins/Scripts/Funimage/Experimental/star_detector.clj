@@ -5,11 +5,11 @@
          '[funimage.segmentation.imp :as ij1seg]
          '[funimage.imp.statistics :as ij1stats])
 
-;(def filename "/Users/kharrington/Data/Sanchez_Alicia/30_no amp.tif")
 
 (when-not (ij.IJ/getInstance)
   (def filename "/Users/kharrington/Data/Harrington_Kyle/SanchezLab/ShapesOnPetriDish.tif")
   (def imp (ij1/open-imp filename)))
+
 
 (ij.IJ/run imp "8-bit" "")
 
