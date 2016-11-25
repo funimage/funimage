@@ -1,6 +1,6 @@
 language: java
 jdk:
-- openjdk7
+- oraclejdk8
 install: true
 script:
 - curl -O https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
