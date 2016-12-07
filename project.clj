@@ -9,10 +9,10 @@
                  [org.clojure/data.zip "0.1.1"]
 
                  ; Java libs
-                 [net.imglib2/imglib2-ij "2.0.0-beta-34"]
-                 [net.imglib2/imglib2-roi "0.4.3"]
+                 [net.imglib2/imglib2-roi "0.4.4"]
+                 [net.imglib2/imglib2-ij "2.0.0-beta-35"]
                  [net.imagej/imagej "2.0.0-rc-55" :exclusions [com.github.jnr/jffi com.github.jnr/jnr-x86asm]]
-                 [ome/bioformats_package "5.2.2"]
+                 [ome/bioformats_package "5.2.4"]
                  
                  ;[sc.fiji/Auto_Threshold "1.16.0"]
                  ]

@@ -7,7 +7,8 @@ script:
 - chmod a+x lein
 - lein test
 - chmod a+x funimage_deploy.sh
-- ./funimage_deploy.sh
+- bash funimage_deploy.sh
+
 env:
   matrix:
   - secure: k8wTgZbX/RKQO/mN8xxV8UprbYonS3jzh3Io0AnXo3g3l66wGbnMGwiXaMovNyBEgkmnH6m9GSmK3sDX/I1RozqHHPzxM8KQMNoDvvU4VVMPVj8n/JxWIROPN8UopX4w+ouBN2B2jHPwXxkqq4HJXZ/nyRRKKRTJhzyJ45MgP3YMIbOKZKslIGOg9doZsLbsYbsI8Bf8P8y8jUy8rhMkNfR+9FQnvYXntuIkYh/dAzLhNGq89D7RSzQaqxLH1zXt5Qqk9NrZqgQItG0ZCkxVXP/jpDLHYLdCa4avJhSvlDuKYKTnYD6ZJd2vUrcfMv7dYgrI/QtxN5qRzmq7Eiw+y+yWX1hlM9hL38lXYu1C9YeLra/FddfGVxU6+ZWADNpp6n/U3micLttRgZkEiw+at0pv81gvMmcRcdSsL6tNCRez/QQHSuSem7Evt/PH3+/G6i5lRgjnXi0JJkup3UOgeoviC+x0QrQbEiqxM0qS12S2Wfqz6HGOT0oaZwp0z2a5vzzKsDcMyqX6dZ0rCOK+FRC0QxxoBbxbAYNTP7qAxy4kQ47h+2FBlSdut5rQP9ugX7tKoP8YpTJYZzHWLSJpV61QxB87ry5qEuSv1Ly7UXxalp3fwDHjrx9TqkAXFuXGc4FoGy0OmzLfT6l0gUa8IUo00IznjJZdeDo2IyIIZ7M=
