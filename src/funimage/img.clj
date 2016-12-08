@@ -101,6 +101,52 @@ Note: this uses threads to avoid some blocking issues."
        (.join t)
        imgs)))
 
+(defn map-localize
+   "Walk all images (as cursors) applying f at each step.
+f is a function that operates on cursors in the same order as imgs
+If you have an ImagePlus, then use funimage.conversion
+Note: this uses threads to avoid some blocking issues."
+   ([f img1]
+     (let [cur1 (.localizingCursor ^Img img1)
+           t (Thread.
+               (fn []
+                 (loop []
+                   (when (.hasNext ^Cursor cur1)
+                     (.fwd ^Cursor cur1)
+                     (f cur1)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       [img1]))
+   ([f img1 img2]
+     (let [cur1 (.localizingCursor ^Img img1)
+           cur2 (.localizingCursor ^Img img2)
+           t (Thread.
+               (fn []
+                 (loop []
+                   (when (and (.hasNext ^Cursor cur1)
+                              (.hasNext ^Cursor cur2))
+                     (.fwd ^Cursor cur1)
+                     (.fwd ^Cursor cur2)
+                     (f cur1 cur2)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       [img1 img2]))
+   ([f img1 img2 & imgs]
+     (let [imgs (concat [img1 img2] imgs)
+           curs (map #(.localizingCursor ^Img %) imgs)
+           t (Thread.
+               (fn []
+                 (loop []
+                   (when (every? #(.hasNext ^Cursor %) curs)
+                     (doseq [cur curs] (.fwd ^Cursor cur))
+                     (apply f curs)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       imgs)))
+
 ; Nonthreaded version
 #_(defn map-imgs
    "Walk all images (as cursors) applying f at each step.
