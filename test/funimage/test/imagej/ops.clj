@@ -23,10 +23,13 @@
   (let [img (ops/create-img-CreateImgFromDimsAndType (net.imglib2.FinalInterval. (long-array [10 10])) (net.imglib2.type.numeric.real.DoubleType.))]    
     (is img)))
 
-#_(let [cat (ij/open-img "/Users/kharrington/git/funimage/black_cat.tif")
-       hat (ij/open-img "/Users/kharrington/git/funimage/witch_hat_small.tif")
-       shape (net.imglib2.algorithm.neighborhood.RectangleShape. 3 false)
-       adder (fn [img1 img2] (imp-flatten (add-overlay-image (copy-imp (img->imp img1)) (img->imp img2) 110 50 100 true)))]
-   (show-imp (tile-imps
-               (map (fn [func] (adder cat (func (img/copy hat) shape)))
-                    [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode]))))
+#_(do 
+   (ij/show-ui)
+   (let [cat (ij/open-img "/Users/kharrington/git/funimage/black_cat.tif")
+         hat (ij/open-img "/Users/kharrington/git/funimage/witch_hat_small.tif")
+         shape (net.imglib2.algorithm.neighborhood.RectangleShape. 3 false)
+         adder (fn [img1 img2] (img/replace-subimg-with-opacity cat hat [110 50] 0))]
+     (ij/show (imp->img
+                (tile-imps
+                  (map (fn [func] (img->imp (adder cat (func (img/copy hat) shape))))
+                       [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode]))))))

@@ -307,3 +307,23 @@ Rectangle only"
           pos (long-array (count start-position))]
       (map-img cursor/copy subimg replacement)))
     img)
+
+(defn replace-subimg-with-opacity
+  "Replace a subimage of a larger image with a smaller one."
+  [img replacement start-position opacity]
+  (let [offset (long-array start-position)
+        replacement-dim (long-array (count start-position))
+        img-dim (long-array (count start-position))]
+    (.dimensions replacement replacement-dim)
+    (.dimensions img img-dim)
+    (let [stop-point (long-array (map #(dec (+ %1 %2)) offset replacement-dim))
+          subimg (Views/interval img offset stop-point)
+          cur (.cursor ^Img replacement)
+          ra (.randomAccess ^IntervalView subimg)
+          pos (long-array (count start-position))]
+      (map-img 
+        (fn [^Cursor cur1 ^Cursor cur2] 
+          (when (> (.get (.get cur2)) opacity)
+            (.set ^net.imglib2.type.numeric.RealType (.get cur1) (.get cur2))))
+        subimg replacement)))
+    img)
