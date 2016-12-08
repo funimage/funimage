@@ -4,7 +4,8 @@
   (:require [funimage.img :as img]
             [funimage.img.cursor :as cursor]
             [funimage.imagej :as ij]
-            [funimage.imagej.ops :as ops]))
+            [funimage.imagej.ops :as ops]
+            [funimage.img.utils :as img-utils]))
 
 #_(let [fi (net.imglib2.FinalInterval. (long-array [10 10]))
        tpe (net.imglib2.type.numeric.real.DoubleType.)
@@ -29,7 +30,6 @@
          hat (ij/open-img "/Users/kharrington/git/funimage/witch_hat_small.tif")
          shape (net.imglib2.algorithm.neighborhood.RectangleShape. 3 false)
          adder (fn [img1 img2] (img/replace-subimg-with-opacity cat hat [110 50] 0))]
-     (ij/show (imp->img
-                (tile-imps
-                  (map (fn [func] (img->imp (adder cat (func (img/copy hat) shape))))
-                       [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode]))))))
+     (ij/show (img-utils/tile-imgs
+                (map (fn [func] (adder cat (func (img/copy hat) shape)))
+                     [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode])))))

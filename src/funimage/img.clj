@@ -309,7 +309,7 @@ Rectangle only"
     img)
 
 (defn replace-subimg-with-opacity
-  "Replace a subimage of a larger image with a smaller one."
+  "Replace a subimage of a larger image with a smaller one if the replacement is greater than the provided opacity value."
   [img replacement start-position opacity]
   (let [offset (long-array start-position)
         replacement-dim (long-array (count start-position))
