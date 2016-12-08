@@ -3,7 +3,9 @@
         [clojure.test])
   (:require [funimage.img :as img]
             [funimage.img.cursor :as cursor]
-            [funimage.imagej.ops :as ops]))
+            [funimage.imagej :as ij]
+            [funimage.imagej.ops :as ops]
+            [funimage.img.utils :as img-utils]))
 
 #_(let [fi (net.imglib2.FinalInterval. (long-array [10 10]))
        tpe (net.imglib2.type.numeric.real.DoubleType.)
@@ -21,3 +23,15 @@
 (deftest test-ops
   (let [img (ops/create-img-CreateImgFromDimsAndType (net.imglib2.FinalInterval. (long-array [10 10])) (net.imglib2.type.numeric.real.DoubleType.))]    
     (is img)))
+
+#_(do 
+   (ij/show-ui)
+   (let [cat (ij/open-img "/Users/kharrington/git/funimage/black_cat.tif")
+         hat (ij/open-img "/Users/kharrington/git/funimage/witch_hat_small.tif")
+         adder (fn [img1 img2] (img/replace-subimg-with-opacity img1 img2 [110 50] 0))]
+     (ij/show (img-utils/tile-imgs
+                (map (fn [func] (adder (img/copy cat) (func (img/copy hat))))
+                     (mapcat (fn [r]
+                               [#(ops/morphology-dilate-DefaultDilate % (net.imglib2.algorithm.neighborhood.RectangleShape. r true))
+                                #(ops/morphology-erode-DefaultErode % (net.imglib2.algorithm.neighborhood.RectangleShape. r true))])
+                             (range 3 7)))))))

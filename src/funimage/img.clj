@@ -55,7 +55,7 @@
   [^Img img]
   (net.imglib2.util.Util/getTypeFromInterval img))
 
-(defn map
+(defn map-img
    "Walk all images (as cursors) applying f at each step.
 f is a function that operates on cursors in the same order as imgs
 If you have an ImagePlus, then use funimage.conversion
@@ -90,6 +90,52 @@ Note: this uses threads to avoid some blocking issues."
    ([f img1 img2 & imgs]
      (let [imgs (concat [img1 img2] imgs)
            curs (map #(.cursor ^Img %) imgs)
+           t (Thread.
+               (fn []
+                 (loop []
+                   (when (every? #(.hasNext ^Cursor %) curs)
+                     (doseq [cur curs] (.fwd ^Cursor cur))
+                     (apply f curs)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       imgs)))
+
+(defn map-localize-img
+   "Walk all images (as cursors) applying f at each step.
+f is a function that operates on cursors in the same order as imgs
+If you have an ImagePlus, then use funimage.conversion
+Note: this uses threads to avoid some blocking issues."
+   ([f img1]
+     (let [cur1 (.localizingCursor ^Img img1)
+           t (Thread.
+               (fn []
+                 (loop []
+                   (when (.hasNext ^Cursor cur1)
+                     (.fwd ^Cursor cur1)
+                     (f cur1)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       [img1]))
+   ([f img1 img2]
+     (let [cur1 (.localizingCursor ^Img img1)
+           cur2 (.localizingCursor ^Img img2)
+           t (Thread.
+               (fn []
+                 (loop []
+                   (when (and (.hasNext ^Cursor cur1)
+                              (.hasNext ^Cursor cur2))
+                     (.fwd ^Cursor cur1)
+                     (.fwd ^Cursor cur2)
+                     (f cur1 cur2)
+                     (recur)))))]
+       (.start t)
+       (.join t)
+       [img1 img2]))
+   ([f img1 img2 & imgs]
+     (let [imgs (concat [img1 img2] imgs)
+           curs (map #(.localizingCursor ^Img %) imgs)
            t (Thread.
                (fn []
                  (loop []
@@ -138,24 +184,24 @@ If you have an ImagePlus, then use funimage.conversion"
 (defn replace
   "Replace img1 with img2"
   [^Img img1 ^Img img2]
-  (second (map
+  (second (map-img
             (fn [^Cursor cur1 ^Cursor cur2] (.set (.get cur2) (.get cur1)))
             img2 img1)))
 
 (defn subtract
   "Subtract the second image from the first (destructive)."
   [^Img img1 ^Img img2]
-  (first (map cursor/sub img1 img2)))
+  (first (map-img cursor/sub img1 img2)))
 
 (defn elmul
   "Subtract the second image from the first (destructive)."
   [^Img img1 ^Img img2]
-  (first (map cursor/mul img1 img2)))
+  (first (map-img cursor/mul img1 img2)))
 
 (defn scale
   "Scale the image."
   [^Img img scalar]
-  (first (map #(cursor/set-val (* (cursor/get-val %) scalar)) img)))
+  (first (map-img #(cursor/set-val (* (cursor/get-val %) scalar)) img)))
 
 (defn threshold
   "Binarize an image about a threshold"
@@ -171,7 +217,7 @@ If you have an ImagePlus, then use funimage.conversion"
   "Take the sum of all pixel values in an image."
   [^Img img]
   (let [sum (atom 0)]
-    (map (fn [^Cursor cur] (swap! sum + (cursor/get-val cur))) img)
+    (map-img (fn [^Cursor cur] (swap! sum + (cursor/get-val cur))) img)
     @sum))
 
 #_(defn replace-subimg
@@ -206,12 +252,12 @@ locations outside these points are assigned fill-value"
   [^Img img bx by bz tx ty tz fill-value]; should take array of locations to generalize to N-D
   (let [location (float-array [0 0 0])
         f-fv (float fill-value)]
-    (first (map (fn [^Cursor cur]
-                  (.localize cur location)
-                  (when (or (< (first location) bx) (< (second location) by) (< (last location) bz)
-                            (> (first location) tx) (> (second location) ty) (> (last location) tz))
-                    (.set (.get cur)
-                      f-fv)))
+    (first (map-img (fn [^Cursor cur]
+                      (.localize cur location)
+                      (when (or (< (first location) bx) (< (second location) by) (< (last location) bz)
+                                (> (first location) tx) (> (second location) ty) (> (last location) tz))
+                        (.set (.get cur)
+                          f-fv)))
              img))))
 
 
@@ -245,3 +291,39 @@ Rectangle only"
           (f center ^net.imglib2.algorithm.neighborhood.RectangleNeighborhoodUnsafe (.get ^net.imglib2.Cursor neighborhood-cursor))
           (recur)))
       dest)))
+
+(defn replace-subimg
+  "Replace a subimage of a larger image with a smaller one."
+  [img replacement start-position]
+  (let [offset (long-array start-position)
+        replacement-dim (long-array (count start-position))
+        img-dim (long-array (count start-position))]
+    (.dimensions replacement replacement-dim)
+    (.dimensions img img-dim)
+    (let [stop-point (long-array (map #(dec (+ %1 %2)) offset replacement-dim))
+          subimg (Views/interval img offset stop-point)
+          cur (.cursor ^Img replacement)
+          ra (.randomAccess ^IntervalView subimg)
+          pos (long-array (count start-position))]
+      (map-img cursor/copy subimg replacement)))
+    img)
+
+(defn replace-subimg-with-opacity
+  "Replace a subimage of a larger image with a smaller one if the replacement is greater than the provided opacity value."
+  [img replacement start-position opacity]
+  (let [offset (long-array start-position)
+        replacement-dim (long-array (count start-position))
+        img-dim (long-array (count start-position))]
+    (.dimensions replacement replacement-dim)
+    (.dimensions img img-dim)
+    (let [stop-point (long-array (map #(dec (+ %1 %2)) offset replacement-dim))
+          subimg (Views/interval img offset stop-point)
+          cur (.cursor ^Img replacement)
+          ra (.randomAccess ^IntervalView subimg)
+          pos (long-array (count start-position))]
+      (map-img 
+        (fn [^Cursor cur1 ^Cursor cur2] 
+          (when (> (.get (.get cur2)) opacity)
+            (.set ^net.imglib2.type.numeric.RealType (.get cur1) (.get cur2))))
+        subimg replacement)))
+    img)
