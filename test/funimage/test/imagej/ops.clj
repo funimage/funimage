@@ -32,4 +32,15 @@
          adder (fn [img1 img2] (img/replace-subimg-with-opacity cat hat [110 50] 0))]
      (ij/show (img-utils/tile-imgs
                 (map (fn [func] (adder cat (func (img/copy hat) shape)))
-                     [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode])))))
+                     [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode
+                      ops/morphology-extractHoles-DefaultExtractHolesFunction])))))
+
+(do 
+   (ij/show-ui)
+   (let [cat (ij/open-img "/Users/kharrington/git/funimage/black_cat.tif")
+         hat (ij/open-img "/Users/kharrington/git/funimage/witch_hat_small.tif")
+         shape (net.imglib2.algorithm.neighborhood.RectangleShape. 3 false)
+         adder (fn [img1 img2] (img/replace-subimg-with-opacity cat hat [110 50] 0))]
+     (ij/show (img-utils/tile-imgs
+                (map (fn [func] (adder cat (func (img/copy hat))))
+                     [#(ops/morphology-dilate-DefaultDilate % shape) #(ops/morphology-erode-DefaultErode % shape)])))))
