@@ -16,3 +16,8 @@
   "Show an image with ImageJ."
   [img]
   (.show (.ui ij) img))
+
+(defn show-ui
+  "Show the ImageJ UI"
+  []
+  (.showUI (.ui ij)))
