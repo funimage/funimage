@@ -46,6 +46,11 @@
   [^Cursor cur]
   (.setZero ^net.imglib2.type.numeric.RealType (.get cur)))
 
+(defn copy
+  "Copy one cursor to another."  
+  [^Cursor cur1 ^Cursor cur2]
+  (.set ^net.imglib2.type.numeric.RealType (.get cur1) (.get cur2)))
+
 (defn add
   "Add 2 cursors together."
   [^Cursor cur1 ^Cursor cur2]
@@ -84,5 +89,6 @@
         (recur (+ sum (.get ^net.imglib2.type.numeric.integer.UnsignedByteType (.get cur)))
               cur))
       sum)))
+
 
 ; Consider a macro that would convert from the usual math functions to the cursor math functions
