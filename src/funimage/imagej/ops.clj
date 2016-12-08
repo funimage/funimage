@@ -105,20 +105,6 @@
                                       (str "^"tpe))) 
                                   " " (.getName %))
                             required-inputs))
-            output-list (string/join
-                          " "
-                          (map #(str (let [tpe (guess-type (.getType %)) ]
-                                       (if (empty? tpe)
-                                         ""
-                                         (str "^"tpe))) 
-                                     " " (.getName %))
-                               (seq (.outputs cinfo))))
-            output-types (string/join
-                           " "
-                           (map #(str (let [tpe (guess-type (.getType %)) ]
-                                        (if (empty? tpe)
-                                          "" tpe)))
-                                (seq (.outputs cinfo))))
             args-to-pass (string/join
                            " "
                            (map #(.getName %)
@@ -133,24 +119,16 @@
                                      (str "." extension))))
             function-name (string/replace op-name "." "-")
             doc-string (.getTitle cinfo)
-            expr (with-out-str
-                   (println "(defn" function-name)
-                   (println "\t\"" doc-string "\"")
-                   (println "\t[" arg-list "]")
-                   (println (str "\t(." (second parts) " (." (first parts) " " op-expression ") " args-to-pass "))")))]
+            expr (read-string
+                   (with-out-str
+                     (println "(defn" function-name)
+                     (println "\t\"" doc-string "\"")
+                     (println "\t[" arg-list "]")
+                     (println (str "\t(." (second parts) " (." (first parts) " " op-expression ") " args-to-pass "))"))))]
         (eval expr)
         {:function-name function-name
          :input-types (map #(guess-type (.getType %))
                            required-inputs)
-         :output-types output-types         
+         :output-types (map #(guess-type (.getType %))
+                            (seq (.outputs cinfo)))
          }))))
-
-;(into #{} (map :type-signature op-list))
-
-#_(def binary-rai
-   (filter #(= (:input-types %) '("net.imglib2.RandomAccessibleInterval" "net.imglib2.RandomAccessibleInterval"))
-           op-list))
-
-#_(def unary-rai
-   (filter #(= (:input-types %) '("net.imglib2.RandomAccessibleInterval"))
-           op-list))
