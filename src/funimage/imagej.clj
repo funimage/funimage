@@ -1,8 +1,7 @@
 (ns funimage.imagej
-  (:require [clojure.reflect :as reflect]
-            [clojure.pprint :as pprint]
-            [clojure.string :as string])
-  (:use [funimage img])
+  (:require [clojure.pprint :as pprint]
+            [clojure.string :as string]
+            [funimage.img :as img])
   (:import [net.imagej ImageJ]))
 
 (defonce ij (net.imagej.ImageJ.))
@@ -12,7 +11,12 @@
   [filename]
   (.getImg (.getImgPlus (.open (.datasetIO (.scifio ij)) filename))))
 
-(defn show-img
+(defn show
   "Show an image with ImageJ."
   [img]
   (.show (.ui ij) img))
+
+(defn show-ui
+  "Show the ImageJ UI"
+  []
+  (.showUI (.ui ij)))

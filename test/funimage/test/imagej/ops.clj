@@ -18,3 +18,6 @@
                (map (fn [func] (adder cat (func (img/copy hat) shape)))
                     [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode]))))
 
+(deftest test-ops
+  (let [img (ops/create-img-CreateImgFromDimsAndType (net.imglib2.FinalInterval. (long-array [10 10])) (net.imglib2.type.numeric.real.DoubleType.))]    
+    (is img)))
