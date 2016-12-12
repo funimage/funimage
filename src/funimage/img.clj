@@ -30,10 +30,12 @@
 
 (defn create-img-like
   "Create an Img like the input."
-  [^Img img]
-  ^Img (.create (.factory img)
-         img
-         (.firstElement img)))
+  ([^Img img tpe]
+    ^Img (.create (.factory img)
+           img
+           tpe))
+  ([^Img img]
+    (create-img-like img (.firstElement img))))
 
 (defn get-size-dimension
   "Return the size along the specified dimension."
@@ -49,6 +51,11 @@
   "Return the height of the img."
   [^Img img]
   (.dimension img 1))
+
+(defn get-depth
+  "Return the depth of the image."
+  [^Img img]
+  (.dimension img 2))
 
 (defn get-type
   "Return the class type of an image."
@@ -327,3 +334,18 @@ Rectangle only"
             (.set ^net.imglib2.type.numeric.RealType (.get cur1) (.get cur2))))
         subimg replacement)))
     img)
+
+(defn get-val
+  "Return the value at a given position."
+  [^Img img ^longs position]
+  (let [^RandomAccess ra (.randomAccess img)]
+    (.setPosition ra position)
+    (.get (.get ra))))
+
+(defn set-val
+  "Set the value at a given position."
+  [^Img img ^longs position new-val]
+  (let [^RandomAccess ra (.randomAccess img)]
+    (.setPosition ra position)
+    (.set (.get ra) new-val))
+  img)
