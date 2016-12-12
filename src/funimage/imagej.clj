@@ -11,6 +11,14 @@
   [filename]
   (.getImg (.getImgPlus (.open (.datasetIO (.scifio ij)) filename))))
 
+(defn save-img
+  "Open an image with ImageJ/SCIFIO"
+  [img filename]
+  (.save (.datasetIO (.scifio ij))
+    (net.imagej.DefaultDataset. 
+      (.context ij) (net.imagej.ImgPlus. img)) 
+    filename))
+
 (defn show
   "Show an image with ImageJ."
   [img]
