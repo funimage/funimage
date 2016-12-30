@@ -133,7 +133,72 @@
                              (seq (.outputs cinfo)))
           }))))
 
-(def op-list2
+; This works for one implementation of the op, but not varargs
+#_(def op-list2
+   (doall
+     (for [[op-name op-infos] (group-by #(.getName %)
+                                        (filter #(valid-ops (.getName %))
+                                                (filter #(not (infos-ignore (.getName %)))
+                                                        (.infos (.op ij/ij)))))]
+       (let [op-info (first op-infos)
+             op-expression "(.op ij/ij)"
+             parts (string/split (.getName op-info) #"\.")
+             cinfo (.cInfo op-info)
+             required-inputs (filter #(.isRequired %) (seq (.inputs cinfo)))
+             optional-inputs (filter #(not (.isRequired %)) (seq (.inputs cinfo)))
+             arg-list (string/join
+                        " "
+                        (map #(str (let [tpe (guess-type (.getType %)) ]
+                                     (if (empty? tpe)
+                                       ""
+                                       (str "^"tpe))) 
+                                   " " (.getName %))
+                             required-inputs))
+             args-to-pass (string/join
+                            " "
+                            (map #(.getName %)
+                                 required-inputs))
+             first-op-name op-name
+             op-name (str op-name (when (> (count op-infos) 1)
+                                    (let [classname (.getClassName (.cInfo op-info))
+                                          tail-part (last (string/split classname #"\."))
+                                          extension (string/replace tail-part "$" "-")
+                                                      #_(if (.contains tail-part "$")
+                                                         (last (string/split tail-part #"\$"))
+                                                         tail-part)]
+                                      (str "." extension))))
+             op-namespace (symbol (string/join
+                                    "."
+                                    (concat [(ns-name *ns*)]
+                                          (butlast (string/split first-op-name #"\.")))))
+             function-name (string/replace op-name "." "-")
+             doc-string (.getTitle cinfo)
+             expr (read-string
+                    (with-out-str
+                      (println "(fn")
+                      (println "\t[" arg-list "]")
+                      (println (str "\t(." (second parts) " (." (first parts) " " op-expression ") " args-to-pass "))"))))]        
+         ; Test if the NS exists, if it doesn't then make it          
+         (when-not (try (ns-name op-namespace) (catch Exception e nil))
+           (println "Making ns:" op-namespace)
+           (create-ns op-namespace))
+         (intern (the-ns op-namespace)
+                 (symbol (last (string/split first-op-name #"\.")))
+                 (eval expr))
+         ;(eval expr)
+         {:function-name function-name
+          :input-types (map #(guess-type (.getType %))
+                            required-inputs)
+          :output-types (map #(guess-type (.getType %))
+                             (seq (.outputs cinfo)))
+          :expression expr
+          :namespace op-namespace
+          }))))
+;(first op-list2)
+
+(def ops-namespaces (atom []))
+
+(def op-list3
   (doall
     (for [[op-name op-infos] (group-by #(.getName %)
                                        (filter #(valid-ops (.getName %))
@@ -143,70 +208,48 @@
             op-expression "(.op ij/ij)"
             parts (string/split (.getName op-info) #"\.")
             cinfo (.cInfo op-info)
-            required-inputs (filter #(.isRequired %) (seq (.inputs cinfo)))
-            optional-inputs (filter #(not (.isRequired %)) (seq (.inputs cinfo)))
-            arg-list (string/join
-                       " "
-                       (map #(str (let [tpe (guess-type (.getType %)) ]
-                                    (if (empty? tpe)
-                                      ""
-                                      (str "^"tpe))) 
-                                  " " (.getName %))
-                            required-inputs))
-            args-to-pass (string/join
-                           " "
-                           (map #(.getName %)
-                                required-inputs))
-            first-op-name op-name
-            op-name (str op-name (when (> (count op-infos) 1)
-                                   (let [classname (.getClassName (.cInfo op-info))
-                                         tail-part (last (string/split classname #"\."))
-                                         extension (string/replace tail-part "$" "-")
-                                                     #_(if (.contains tail-part "$")
-                                                        (last (string/split tail-part #"\$"))
-                                                        tail-part)]
-                                     (str "." extension))))
             op-namespace (symbol (string/join
                                    "."
                                    (concat [(ns-name *ns*)]
-                                         (butlast (string/split first-op-name #"\.")))))
-            function-name (string/replace op-name "." "-")
+                                         (butlast (string/split op-name #"\.")))))
+            function-name (last (string/split op-name #"\."))
             doc-string (.getTitle cinfo)
+
+            fn-defs (doall
+                      (for [op-info op-infos]
+                        (let [cinfo (.cInfo op-info)                            
+                              required-inputs (filter #(.isRequired %) (seq (.inputs cinfo)))
+                              optional-inputs (filter #(not (.isRequired %)) (seq (.inputs cinfo)))
+                              arg-list (string/join
+                                         " "
+                                         (map #(str (let [tpe (guess-type (.getType %)) ]
+                                                      (if (empty? tpe)
+                                                        ""
+                                                        (str "^"tpe))) 
+                                                    " " (.getName %))
+                                              required-inputs))
+                              args-to-pass (string/join
+                                             " "
+                                             (map #(.getName %)
+                                                  required-inputs))]
+                          [(count required-inputs)
+                           (with-out-str
+                             (println "([" arg-list "]")
+                             (println (str "\t(." (second parts) " (." (first parts) " " op-expression ") " args-to-pass "))")))])))
+            arity-map (apply hash-map (flatten fn-defs))
             expr (read-string
-                   (with-out-str
-                     (println "(fn")
-                     (println "\t[" arg-list "]")
-                     (println (str "\t(." (second parts) " (." (first parts) " " op-expression ") " args-to-pass "))"))))]        
+                   (str "(fn " (string/join " " (vals arity-map)) ")"))]        
+        ;(println expr)
         ; Test if the NS exists, if it doesn't then make it          
         (when-not (try (ns-name op-namespace) (catch Exception e nil))
-          (println "Making ns:" op-namespace)
-          (create-ns op-namespace))
+          (println "Making ns:" op-namespace)          
+          (create-ns op-namespace)
+          (swap! ops-namespaces conj op-namespace))
         (intern (the-ns op-namespace)
-                (symbol (last (string/split first-op-name #"\.")))
+                (symbol function-name)
                 (eval expr))
         ;(eval expr)
         {:function-name function-name
-         :input-types (map #(guess-type (.getType %))
-                           required-inputs)
-         :output-types (map #(guess-type (.getType %))
-                            (seq (.outputs cinfo)))
          :expression expr
          :namespace op-namespace
          }))))
-(first op-list2)
-
-#_(do 
-   (require '[funimage.img :as img])
-   (require '[funimage.img.utils :as img-utils])
-   (use 'clojure.repl)
-   (ij/show-ui)
-  
-   (let [cat (ij/open-img "/Users/kharrington/git/funimage/black_cat.tif")
-         hat (ij/open-img "/Users/kharrington/git/funimage/witch_hat_small.tif")
-         adder (fn [img1 img2] (img/replace-subimg-with-opacity img1 img2 [110 50] 0))]
-     (ij/show (img-utils/tile-imgs
-                (map (fn [func] (adder (img/copy cat) (func (img/copy hat))))
-                     (mapcat (fn [r]
-                               [#(morphology-dilate-DefaultDilate % (net.imglib2.algorithm.neighborhood.RectangleShape. r true))
-                                #(morphology-erode-DefaultErode % (net.imglib2.algorithm.neighborhood.RectangleShape. r true))])
-                             (range 3 7)))))))
