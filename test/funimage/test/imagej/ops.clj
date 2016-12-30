@@ -3,6 +3,7 @@
         [clojure.test])
   (:require [funimage.img :as img]
             [funimage.img.cursor :as cursor]
+            [funimage.img.shape :as shape]
             [funimage.imagej :as ij]
             [funimage.imagej.ops :as ops]
             ;[funimage.imagej.ops.create :as create]
@@ -21,6 +22,6 @@
      (ij/show (img-utils/tile-imgs
                 (map (fn [func] (adder (img/copy cat) (func (img/copy hat))))
                      (mapcat (fn [r]
-                               [#(funimage.imagej.ops.morphology/dilate % (net.imglib2.algorithm.neighborhood.RectangleShape. r true))
-                                #(funimage.imagej.ops.morphology/erode % (net.imglib2.algorithm.neighborhood.RectangleShape. r true))])
+                               [#(funimage.imagej.ops.morphology/dilate % (shape/rectangle-shape r))
+                                #(funimage.imagej.ops.morphology/erode % (shape/rectangle-shape r))])
                              (range 3 7)))))))
