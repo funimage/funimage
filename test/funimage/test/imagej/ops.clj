@@ -5,6 +5,8 @@
             [funimage.img.cursor :as cursor]
             [funimage.imagej :as ij]
             [funimage.imagej.ops :as ops]
+            ;[funimage.imagej.ops.create :as create]
+            ;[funimage.imagej.ops.morphology :as morphology]
             [funimage.img.utils :as img-utils]))
 
 #_(let [fi (net.imglib2.FinalInterval. (long-array [10 10]))
@@ -21,7 +23,7 @@
                     [ops/morphology-dilate-DefaultDilate ops/morphology-erode-DefaultErode]))))
 
 (deftest test-ops
-  (let [img (ops/create-img-CreateImgFromDimsAndType (net.imglib2.FinalInterval. (long-array [10 10])) (net.imglib2.type.numeric.real.DoubleType.))]    
+  (let [img (funimage.imagej.ops.create/img (net.imglib2.FinalInterval. (long-array [10 10])) (net.imglib2.type.numeric.real.DoubleType.))]    
     (is img)))
 
 #_(do 

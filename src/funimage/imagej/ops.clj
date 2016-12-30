@@ -253,3 +253,6 @@
          :expression expr
          :namespace op-namespace
          }))))
+
+#_(doseq [op-ns @ops-namespaces]
+   (require op-ns))

@@ -13,9 +13,9 @@
   ([imgs width height]
     (let [img-width (.dimension (first imgs) 0)
           img-height (.dimension (first imgs) 1)
-          tile-img ^net.imglib2.img.Img (ops/create-img-CreateImgFromDimsAndType (net.imglib2.FinalInterval. (long-array [(* width img-width)
-                                                                                                                          (* height img-height)]))
-                                                                                 (.firstElement (first imgs)))
+          tile-img ^net.imglib2.img.Img (funimage.imagej.ops.create/img (net.imglib2.FinalInterval. (long-array [(* width img-width)
+                                                                                                                 (* height img-height)]))
+                                                                        (.firstElement (first imgs)))
           tile-ra (.randomAccess tile-img)]
       (doall (for [tx (range width)
                    ty (range height)
