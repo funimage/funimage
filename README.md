@@ -6,7 +6,6 @@ funimage
 Functional Image Processing with ImageJ/FIJI
 
 [![Build Status](https://travis-ci.org/funimage/funimage.svg?branch=master)](https://travis-ci.org/funimage/funimage)
-[![Clojars Project](http://clojars.org/funimage/latest-version.svg)](http://clojars.org/funimage)
 
 =========
 
@@ -21,6 +20,18 @@ Add an update site like you would usually (see http://fiji.sc/List_of_update_sit
 where the update site is: http://sites.imagej.net/Funimage/  
 
 =========
+
+#Usage within Clojure projects:
+
+Add the following to your `project.clj`
+
+```
+  :repositories [["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
+                 ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]]
+                 
+```                 
+                 
+========                 
 
 Citing:
 
