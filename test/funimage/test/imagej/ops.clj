@@ -11,7 +11,7 @@
             [funimage.img.utils :as img-utils]))
 
 (deftest test-ops
-  (let [img (funimage.imagej.ops.create/img (net.imglib2.FinalInterval. (long-array [10 10])) (net.imglib2.type.numeric.real.DoubleType.))]    
+  (let [img (funimage.imagej.ops.create/img (img-utils/interval [10 10]) (net.imglib2.type.numeric.real.DoubleType.))]    
     (is img)))
 
 #_(do 

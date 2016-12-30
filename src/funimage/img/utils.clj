@@ -3,6 +3,14 @@
             [funimage.img.cursor :as cursor]
             [funimage.imagej.ops :as ops]))
 
+(defn interval
+  "Return an Interval data structure."
+  ([dimensions]
+    (net.imglib2.FinalInterval. (long-array dimensions)))
+  ([min max]
+    (net.imglib2.FinalInterval. (long-array min) 
+                                (long-array max))))
+
 (defn tile-imgs
   "(2D only) Tile a set of images, currently assumes all are same size as the first one."
   ([imgs]
@@ -13,8 +21,8 @@
   ([imgs width height]
     (let [img-width (.dimension (first imgs) 0)
           img-height (.dimension (first imgs) 1)
-          tile-img ^net.imglib2.img.Img (funimage.imagej.ops.create/img (net.imglib2.FinalInterval. (long-array [(* width img-width)
-                                                                                                                 (* height img-height)]))
+          tile-img ^net.imglib2.img.Img (funimage.imagej.ops.create/img (interval [(* width img-width)
+                                                                                   (* height img-height)])
                                                                         (.firstElement (first imgs)))
           tile-ra (.randomAccess tile-img)]
       (doall (for [tx (range width)
