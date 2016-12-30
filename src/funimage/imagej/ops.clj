@@ -86,7 +86,6 @@
                    (str "(fn " (string/join " " (vals arity-map)) ")"))]        
         ; Test if the NS exists, if it doesn't then make it          
         (when-not (try (ns-name op-namespace) (catch Exception e nil))
-          (println "Making ns:" op-namespace)          
           (create-ns op-namespace)
           (swap! ops-namespaces conj op-namespace))
         ; Make the function and load it into the respective namespace
