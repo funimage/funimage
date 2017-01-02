@@ -12,19 +12,25 @@
 (ij.IJ/setAutoThreshold imp, "Default dark")
 (ij.IJ/run imp "Convert to Mask" "")
 
-(def output (atom imp))
-
 (def ^ij.plugin.ImageCalculator ic (ij.plugin.ImageCalculator.))
 
-(dotimes [step num-steps]
-  (let [^ImagePlus imp2 (.crop @output)
+(def output
+  (atom
+   (ij1/zconcat-imps
+    (for [step (range num-steps)]
+       (let [^ij.ImagePlus imp2 (.crop imp)]
+         (println step (* step angle))
+         (ij.IJ/run imp2 "Rotate... "
+           (str "angle=" (* step angle) " grid=1 interpolation=None"))
+         ^ij.ImagePlus (.run ic "OR create" imp imp2))))))
+
+#_(dotimes [step num-steps]
+  (let [^ij.ImagePlus imp2 (.crop imp)
         _  (ij.IJ/run imp2 "Rotate... "
              (str "angle=" angle " grid=1 interpolation=None"))
-        ^ImagePlus imp3 (.run ic "OR create" @output imp2)]
-    (set! (.changes @output) false)
-    (.close @output)
-    (ij1/set-title @output (str "Moire-" step))
-    (reset! output imp3)))
+        ^ij.ImagePlus imp3 (.run ic "OR create" imp imp2)]
+    (.addSlice (.getImageStack @output) ^ij.process.ImageProcessor (.getProcessor imp3))
+    (ij1/set-title @output "Moire")))
 
 (ij1/show-imp @output)
 
