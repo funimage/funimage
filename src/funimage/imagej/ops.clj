@@ -57,8 +57,7 @@
                                    "."
                                    (concat [(ns-name *ns*)]
                                          (butlast (string/split op-name #"\.")))))
-            function-name (last (string/split op-name #"\."))
-            doc-string (.getTitle cinfo)
+            function-name (last (string/split op-name #"\."))            
 
             fn-defs (doall
                       (for [op-info op-infos]
@@ -83,7 +82,9 @@
                              (println (str "\t(." (second parts) " (." (first parts) " " op-expression ") " args-to-pass "))")))])))
             arity-map (apply hash-map (flatten fn-defs))
             expr (read-string
-                   (str "(fn " (string/join " " (vals arity-map)) ")"))]        
+                   (str "(fn " (string/join " " (vals arity-map)) ")"))
+            doc-string (str (.getTitle cinfo) "\n"
+                            "Number of inputs: " (string/join " " (map #(str %) (keys arity-map))))]
         ; Test if the NS exists, if it doesn't then make it          
         (when-not (try (ns-name op-namespace) (catch Exception e nil))
           (create-ns op-namespace)
@@ -91,7 +92,10 @@
         ; Make the function and load it into the respective namespace
         (intern (the-ns op-namespace)
                 (symbol function-name)
-                (eval expr))
+                (let [this-fn (eval expr)]
+                  (with-meta this-fn 
+                    (assoc (meta this-fn)
+                      :doc doc-string))))
         ; This doesnt need to be captured anymore
         {:function-name function-name
          :expression expr

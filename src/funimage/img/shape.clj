@@ -16,3 +16,8 @@
   "Return a RectangleShape."
   [length]
   (net.imglib2.algorithm.neighborhood.RectangleShape. length true))
+
+(defn sphere-shape
+  "Return a sphere shape"
+  [radius]
+  (net.imglib2.algorithm.neighborhood.HyperSphereShape. radius))

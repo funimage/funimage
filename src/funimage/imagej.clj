@@ -21,8 +21,10 @@
 
 (defn show
   "Show an image with ImageJ."
-  [img]
-  (.show (.ui ij) img))
+  ([img]
+    (.show (.ui ij) img))
+  ([img title]
+    (.show (.ui ij) title img)))
 
 (defn show-ui
   "Show the ImageJ UI"
