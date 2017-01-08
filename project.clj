@@ -19,6 +19,7 @@
   :java-source-paths ["java"]
   :repositories [["imagej" "http://maven.imagej.net/content/groups/hosted/"]
                  ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
+                 ["ome maven" "http://artifacts.openmicroscopy.org/artifactory/maven/"]
                  ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]
                  ["clojars2" {:url "http://clojars.org/repo/"
                              :username :env/LEIN_USERNAME
