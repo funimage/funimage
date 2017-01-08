@@ -1,4 +1,4 @@
-(defproject funimage "0.1.93-SNAPSHOT"
+(defproject funimage "0.1.93"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -19,7 +19,6 @@
   :java-source-paths ["java"]
   :repositories [["imagej" "http://maven.imagej.net/content/groups/hosted/"]
                  ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
-                 ["ome maven" "http://artifacts.openmicroscopy.org/artifactory/maven/"]
                  ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]
                  ["clojars2" {:url "http://clojars.org/repo/"
                              :username :env/LEIN_USERNAME
