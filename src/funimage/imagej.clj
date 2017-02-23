@@ -26,6 +26,10 @@
   ([img title]
     (.show (.ui ij) title img)))
 
+(defn notebook-show
+  [image]
+  (.display (.notebook ij/ij) image))
+
 (defn show-ui
   "Show the ImageJ UI"
   []
