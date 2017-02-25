@@ -28,7 +28,7 @@
 
 (defn notebook-show
   [image]
-  (.display (.notebook ij/ij) image))
+  (.display (.notebook ij) image))
 
 (defn show-ui
   "Show the ImageJ UI"
