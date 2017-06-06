@@ -23,6 +23,11 @@
            [net.imglib2.view Views IntervalView]
            [net.imglib2 Cursor RandomAccess]))
 
+(defn open-roi
+  "Open an ROI from filename"
+  [filename]
+  ^Roi (ij.io.RoiDecoder/open filename))
+
 (defn rectangle-roi
   "Make a rectangular ROI."
   [x y w h]
@@ -182,3 +187,86 @@
                      xpoints (concat (rest ypoints) [(first ypoints)])
                      ypoints (concat (rest xpoints) [(first xpoints)])))
        2)))
+
+(defn centroid
+  "Get centroid of a ROI."
+  [roi]
+  (let [poly ^ij.process.FloatPolygon (.getFloatPolygon roi)
+        min-x (apply min (.xpoints poly))
+        max-x (apply max (.xpoints poly))
+        min-y (apply min (.ypoints poly))
+        max-y (apply max (.ypoints poly))
+        
+        xpoints (.xpoints poly)
+        ypoints (.ypoints poly)
+        area (roi-area roi)
+        cx (/ (apply +
+                     (for [idx (range (dec (count xpoints)))]
+                       (* (+ (nth xpoints idx)
+                             (nth xpoints (inc idx)))
+                          (- (* (nth xpoints idx)
+                                (nth ypoints (inc idx)))
+                             (* (nth xpoints (inc idx))
+                                (nth ypoints idx))))))
+             (* 6 area))
+        cy (/ (apply +
+                     (for [idx (range (dec (count xpoints)))]
+                       (* (+ (nth ypoints idx)
+                             (nth ypoints (inc idx)))
+                          (- (* (nth xpoints idx)
+                                (nth ypoints (inc idx)))
+                             (* (nth xpoints (inc idx))
+                                (nth ypoints idx))))))
+             (* 6 area))]
+    [cx cy]))
+    
+(defn overlaps?
+  "Do 2 ROIs overlap?"
+  [roi-a roi-b]
+  (let [poly-a ^ij.process.FloatPolygon (.getFloatPolygon roi-a)
+        xpoints-a (.xpoints poly-a)
+	      ypoints-a (.ypoints poly-a)
+        
+	      min-x-a (apply min xpoints-a)
+	      max-x-a (apply max xpoints-a)
+	      min-y-a (apply min ypoints-a)
+	      max-y-a (apply max ypoints-a)
+	      
+       
+        poly-b ^ij.process.FloatPolygon (.getFloatPolygon roi-b)
+	      xpoints-b (.xpoints poly-b)
+	      ypoints-b (.ypoints poly-b)
+        
+	      min-x-b (apply min xpoints-b)
+	      max-x-b (apply max xpoints-b)
+	      min-y-b (apply min ypoints-b)
+	      max-y-b (apply max ypoints-b)
+	      	      
+	      a-contains-b (for [idx (range (count xpoints-a))]
+                      (.contains poly-b
+                        (nth xpoints-a idx)
+                        (nth ypoints-a idx)))
+        b-contains-a (for [idx (range (count xpoints-b))]
+                       (.contains poly-a
+                         (nth xpoints-b idx)
+                         (nth ypoints-b idx)))]
+    (or (reduce #(or %1 %2)
+                a-contains-b)
+        (reduce #(or %1 %2)
+                b-contains-a))))
+
+(defn clear-outside-roi
+  "Clear the image outside the roi. Set the background color beforehand"
+  [imp roi]
+  (let [prev-roi (get-roi imp)]
+    (set-roi imp roi)
+    (ij.IJ/run imp "Clear Outside" "slice")
+    (set-roi imp prev-roi)))
+
+(defn clear-roi
+  "Clear the image outside the roi. Set the background color beforehand"
+  [imp roi]
+  (let [prev-roi (get-roi imp)]
+    (set-roi imp roi)
+    (ij.IJ/run imp "Clear" "slice")
+    (set-roi imp prev-roi)))

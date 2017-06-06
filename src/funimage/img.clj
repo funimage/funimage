@@ -208,7 +208,8 @@ If you have an ImagePlus, then use funimage.conversion"
 (defn scale
   "Scale the image."
   [^Img img scalar]
-  (first (map-img #(cursor/set-val (* (cursor/get-val %) scalar)) img)))
+  (first (map-img #(cursor/set-val % 
+                                   (* (cursor/get-val %) scalar)) img)))
 
 (defn threshold
   "Binarize an image about a threshold"

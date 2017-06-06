@@ -77,7 +77,8 @@
                        (= k :skewness) ij.measure.Measurements/SKEWNESS
                        (= k :slice) ij.measure.Measurements/SLICE
                        (= k :stack-position) ij.measure.Measurements/STACK_POSITION
-                       (= k :std-dev) ij.measure.Measurements/STD_DEV)))
+                       (= k :std-dev) ij.measure.Measurements/STD_DEV
+                       :else 0)))
         measurement-options (if measurement-options measurement-options 0)
         measurement-options (cond (and (contains? argmap :solidity) 
                                        (contains? argmap :area))
@@ -171,6 +172,7 @@
                                   (if (zero? ncount) 0 (/ v ncount))
                                   :else
                                   v)]))
+                 :num-neighbors ncount
                  :roi (:roi target-roi)))))))
 
 (defn correlated-rolling-ball-statistics

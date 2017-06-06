@@ -937,4 +937,9 @@
   (ij.IJ/run imp "Enhance Contrast" "saturated=0.35")
   imp)
 
+(defn subtract-background
+  "Perform 2D rolling ball subtraction."
+  [^ij.ImagePlus imp radius]
+  (ij.IJ/run imp "Subtract Background..." (str "rolling=" radius))
+  imp)
   
