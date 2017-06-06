@@ -25,7 +25,8 @@
                 :fn   feature-fn})))
 
 (defn generate-position
-  "Generate a candidate sample position"
+  "Generate a candidate sample position.
+We should probably give a way of providing a custom dimension ordering."
   [seg label]
   (cond (= (:segmentation-type seg) :3D)
         (long-array [(rand-int (img/get-width label))
@@ -59,6 +60,46 @@
                              :positive-samples (conj (:positive-samples seg) candidate-pos))))
              ; False, and need negative samples
              (and (not candidate-val)
+                  (< (count (:negative-samples seg)) (:num-negative-samples seg)))
+             (do
+               (when (:verbose seg)
+                     (println "pos:" (count (:positive-samples seg))
+                              "neg:" (count (:negative-samples seg))))
+               (recur (assoc seg
+                             :negative-samples (conj (:negative-samples seg) candidate-pos))))
+             :else
+             (recur seg)))
+      seg)))
+
+(defn generate-sample-points-negative-labels
+  "Generate the positive and negative sample points given a segmentation and the target labeling.
+      Positive samples are drawn from the labeling, while negative samples come from regions outside the labeling."
+  [seg label negative-labels]
+  (loop [seg seg]
+    (if (or (< (count (:positive-samples seg))
+               (:num-positive-samples seg))
+            (< (count (:negative-samples seg))
+               (:num-negative-samples seg)))
+      (let [candidate-pos (generate-position seg label)
+            candidate-val (img/get-val label candidate-pos)]
+        #_(println (map #(img/get-val % candidate-pos)
+                                     negative-labels)
+                  (reduce #(or %1 %2) (map #(img/get-val % candidate-pos)
+                                           negative-labels)))
+           (cond                                    ; True, and need positive samples
+             (and candidate-val
+                  (< (count (:positive-samples seg)) (:num-positive-samples seg)))
+             (do
+               (when (:verbose seg)
+                     (println "pos:" (count (:positive-samples seg))
+                              "neg:" (count (:negative-samples seg))))
+               (recur (assoc seg
+                             :positive-samples (conj (:positive-samples seg) candidate-pos))))
+             ; False, and need negative samples
+             (and (and (not candidate-val)
+                       (reduce #(or %1 %2)
+                               (map #(img/get-val % candidate-pos)
+                                    negative-labels)))
                   (< (count (:negative-samples seg)) (:num-negative-samples seg)))
              (do
                (when (:verbose seg)
@@ -109,7 +150,8 @@
                            (apply (partial map list)
                                   (:feature-vals seg))))
         coefficients (org.apache.commons.math3.linear.Array2DRowRealMatrix. data-matrix false)
-        solver (.getSolver (org.apache.commons.math3.linear.QRDecomposition. coefficients))
+        ;solver (.getSolver (org.apache.commons.math3.linear.QRDecomposition. coefficients))
+        solver (.getSolver (org.apache.commons.math3.linear.SingularValueDecomposition. coefficients))
         
         constants (org.apache.commons.math3.linear.ArrayRealVector. (double-array (:target-vals seg)) false)
         solution (.solve solver constants)]
@@ -135,6 +177,7 @@
                                                              feature-name ".tif"))))
                             (imagej/open-img (str (:cache-directory seg) (:cache-basename seg) "_" feature-name ".tif"))
                             (feature-map-fn to-segment)))]
+        (println feature-name (str (:cache-directory seg) (:cache-basename seg) "_" feature-name ".tif"))
         (funimage.imagej.ops.math/add solution-img
                                       solution-img
                                       (funimage.imagej.ops.math/multiply (funimage.imagej.ops.convert/float32 feature-map)
