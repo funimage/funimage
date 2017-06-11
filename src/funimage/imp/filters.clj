@@ -8,7 +8,7 @@
            [ij.process ImageProcessor ByteProcessor ImageStatistics FHT ]
            [ij.measure Calibration]                     
            
-           [org.jtransforms.fft FloatFFT_3D]
+           ;[org.jtransforms.fft FloatFFT_3D]
            
            [ij.io Opener]
            ;[io.scif.img ImgOpener]
@@ -51,22 +51,22 @@
             (.addSlice stack ip2)))
         (ImagePlus. (str "Padded " (.getTitle imp)) stack)))))
 
-(defn fft3d
-  "Do a 3d FFT"
-  [imp]
-  (let [imp (pad-power-of-2 imp)
-        fft (FloatFFT_3D. (get-stack-depth imp) (get-width imp) (get-height imp))
-        outimp (imp-copy-create imp imp)
-        data (make-array Float/TYPE (get-stack-depth imp) (get-width imp) (get-height imp))
-        #_(double-array (.getVoxels (.getStack imp) 0 0 0 (get-width imp) (get-height imp) (get-stack-depth imp) (float-array (* (get-width imp) (get-height imp) (get-stack-depth imp)))))]
-    (dotimes [k (get-stack-depth imp)]
-      (.setSlice imp k)
-      (aset data k (.getFloatArray (.getProcessor imp))))
-    (.realForward fft data)
-    (dotimes [k (get-stack-depth imp)]
-      (.setSlice outimp k)
-      (.setFloatArray (.getProcessor imp) (aget data k)))
-    outimp))
+#_(defn fft3d
+   "Do a 3d FFT"
+   [imp]
+   (let [imp (pad-power-of-2 imp)
+         fft (FloatFFT_3D. (get-stack-depth imp) (get-width imp) (get-height imp))
+         outimp (imp-copy-create imp imp)
+         data (make-array Float/TYPE (get-stack-depth imp) (get-width imp) (get-height imp))
+         #_(double-array (.getVoxels (.getStack imp) 0 0 0 (get-width imp) (get-height imp) (get-stack-depth imp) (float-array (* (get-width imp) (get-height imp) (get-stack-depth imp)))))]
+     (dotimes [k (get-stack-depth imp)]
+       (.setSlice imp k)
+       (aset data k (.getFloatArray (.getProcessor imp))))
+     (.realForward fft data)
+     (dotimes [k (get-stack-depth imp)]
+       (.setSlice outimp k)
+       (.setFloatArray (.getProcessor imp) (aget data k)))
+     outimp))
 
 ; Registration3d version
 

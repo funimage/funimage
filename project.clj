@@ -1,4 +1,4 @@
-(defproject funimage "0.1.97"
+(defproject funimage "0.1.98-SNAPSHOT"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -13,6 +13,7 @@
                  [random-forests-clj "0.2.0"]
 
                  ; Java libs
+                 [net.imglib2/imglib2-algorithm "0.8.0"]
                  [net.imglib2/imglib2-roi "0.4.6"]
                  [net.imglib2/imglib2-ij "2.0.0-beta-37"]
                  [net.imagej/imagej "2.0.0-rc-61" :exclusions [com.github.jnr/jffi com.github.jnr/jnr-x86asm]]

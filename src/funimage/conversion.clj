@@ -6,6 +6,7 @@
            [ij IJ ImagePlus]
            
            #_[ij.io Opener]
+           [java.awt.image BufferedImage]
                       
            [net.imglib2.img ImagePlusAdapter Img]
            [net.imglib2.img.display.imagej ImageJFunctions]
@@ -32,3 +33,8 @@
   "Return a BufferedImage from an ImagePlus."
   [^ImagePlus imp]
   (.getBufferedImage imp))
+
+(defn buffered-image->imp
+  "Return an ImagePlus from a BufferedImage."
+  [^BufferedImage bi]
+  ^ImagePlus (ImagePlus. "ConvertedBufferedImage" bi))

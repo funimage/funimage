@@ -29,12 +29,12 @@
 We should probably give a way of providing a custom dimension ordering."
   [seg label]
   (cond (= (:segmentation-type seg) :3D)
-        (long-array [(rand-int (img/get-width label))
-                     (rand-int (img/get-height label))
-                     (rand-int (img/get-size-dimension label 2))])
+        ^longs (long-array [(rand-int (img/get-width label))
+                            (rand-int (img/get-height label))
+                            (rand-int (img/get-size-dimension label 2))])
         (= (:segmentation-type seg) :2D)
-        (long-array [(rand-int (img/get-width label))
-                     (rand-int (img/get-height label))])
+        ^longs (long-array [(rand-int (img/get-width label))
+                            (rand-int (img/get-height label))])
         :else
         (println "We should autodetect here")))
 
@@ -42,13 +42,15 @@ We should probably give a way of providing a custom dimension ordering."
   "Generate the positive and negative sample points given a segmentation and the target labeling.
       Positive samples are drawn from the labeling, while negative samples come from regions outside the labeling."
   [seg label]
+  ;(println "generate-sample-points " (class label))
   (loop [seg seg]
     (if (or (< (count (:positive-samples seg))
                (:num-positive-samples seg))
             (< (count (:negative-samples seg))
-               (:num-negative-samples seg)))
+               (:num-negative-samples seg)))      
       (let [candidate-pos (generate-position seg label)
-            candidate-val (img/get-val label candidate-pos)]
+            candidate-val (img/get-val ^net.imglib2.img.imageplus.ByteImagePlus label ^longs candidate-pos)]
+        ;(println "Positive " (count (:positive-samples seg)) " Negative " (count (:negative-samples seg)) " val " candidate-val)
            (cond                                    ; True, and need positive samples
              (and candidate-val
                   (< (count (:positive-samples seg)) (:num-positive-samples seg)))
@@ -59,7 +61,8 @@ We should probably give a way of providing a custom dimension ordering."
                (recur (assoc seg
                              :positive-samples (conj (:positive-samples seg) candidate-pos))))
              ; False, and need negative samples
-             (and (not candidate-val)
+             (and (or (not candidate-val)
+                      (zero? candidate-val))
                   (< (count (:negative-samples seg)) (:num-negative-samples seg)))
              (do
                (when (:verbose seg)

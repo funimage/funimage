@@ -1,5 +1,5 @@
 (ns funimage.filters.utils
-  (:use [brevis random]))
+  #_(:use [brevis random])); should use clj-random
 
 (defn make-odd [n] (if (not (odd? n))
                      (+ n 1)
@@ -7,7 +7,7 @@
 
 (defn random-negate
   [num]
-  (let [negate? (lrand-int 2)]
+  (let [negate? (rand-int 2)]
     (if (= negate? 0)
       num
       (unchecked-negate num))))
