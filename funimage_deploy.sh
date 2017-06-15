@@ -1,8 +1,8 @@
 #!/bin/bash
 
 if [[ $TRAVIS_BRANCH == 'master' ]]
-then
-   lein deploy
+then   
+   LEIN_SNAPSHOTS_IN_RELEASE=1 lein deploy
    curl -O http://downloads.imagej.net/fiji/latest/fiji-nojre.zip
    unzip fiji-nojre.zip
    mv target/funimage* Fiji.app/jars/
