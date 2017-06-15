@@ -1,4 +1,4 @@
-(defproject funimage "0.1.98"
+(defproject funimage "0.1.99-SNAPSHOT"
   :description "Functional Image Processing with ImageJ/FIJI"
   :url "https://github.com/funimage/funimage"
   :license {:name "Apache v2.0"
@@ -8,6 +8,7 @@
                  ;[me.raynes/fs "1.4.6"]
                  ;[org.clojure/data.zip "0.1.1"]
                  [clj-random "0.1.8"]
+                 [net.imagej/imagej-mesh "0.1.1-SNAPSHOT"]
                  
                  ;[cc.artifice/clj-ml "0.8.5"]
                  [random-forests-clj "0.2.0"]
