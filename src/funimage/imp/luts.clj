@@ -68,11 +68,11 @@
    (.dispose g)
    (show-imp (ij.ImagePlus. "LUT" image))))
 
-(initialize-luts "/Applications/Fiji 2.app/luts")
+;(initialize-luts "/Applications/Fiji 2.app/luts")
 #_(doseq [[k v] @luts]
    (println k v))
 ;(show-color-model (:color-model (get @luts "unionjack")))
-(show-lut (:color-model (get @luts "unionjack")))
+;(show-lut (:color-model (get @luts "unionjack")))
 
 #_(let [tmp (int-array 256)]
    (.getRGBs (:color-model (get @luts "smart")) tmp)
@@ -106,9 +106,9 @@
   
 
 
-(let [imp (open-imp "DrosophilaWing.tif")]
-  (show-imp imp)
-  #_(println (get-luts)))
+#_(let [imp (open-imp "DrosophilaWing.tif")]
+   (show-imp imp)
+   #_(println (get-luts)))
 
 
 ; Draw color bar

@@ -7,7 +7,7 @@
            [net.imglib2.type.numeric.real FloatType]
            [net.imglib2.algorithm.gauss3 Gauss3]
            [net.imglib2.algorithm.dog DifferenceOfGaussian]
-           [net.imglib2.algorithm.fft2 FFTConvolution]
+           ;[net.imglib2.algorithm.fft2 FFTConvolution]
            [net.imglib2.view Views]
            [net.imglib2 Cursor]
            [java.util.concurrent Executors])
@@ -31,13 +31,13 @@
     (DifferenceOfGaussian/DoG sigma1 sigma2 infiniteImg img es)
     img))
 
-(defn convolve-3d
-  "Perform a 3D convolution with an arbitrary kernel."
-  [img kernel]
-  (FFTConvolution. (copy-image img) kernel))
+#_(defn convolve-3d
+   "Perform a 3D convolution with an arbitrary kernel."
+   [img kernel]
+   (FFTConvolution. (copy-image img) kernel))
 
-(defn convolve
-  "Perform a FFT convolution with an arbitrary kernel."
-  [img kernel]
-  (FFTConvolution. (copy-image img) kernel))
+#_(defn convolve
+   "Perform a FFT convolution with an arbitrary kernel."
+   [img kernel]
+   (FFTConvolution. (copy-image img) kernel))
   
