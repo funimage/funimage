@@ -205,3 +205,12 @@ We should probably give a way of providing a custom dimension ordering."
          :num-positive-samples seg
          :num-negative-samples seg}))
          
+(defn clear-cache
+  "Clear the cache we created for our featuremaps"
+  [seg]
+  (dotimes [k (count (:feature-map-fns seg))]
+      (let [ffmap (nth (:feature-map-fns seg) k)
+            feature-name (:name ffmap)
+            feature-map-fn (:fn ffmap)]
+        (when (:cache-directory seg)
+          (.delete (java.io.File. (str (:cache-directory seg) (:cache-basename seg) "_" feature-name ".tif")))))))
