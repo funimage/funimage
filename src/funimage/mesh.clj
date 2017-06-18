@@ -10,9 +10,9 @@
   "Convert a Vertex to Vector3D."
   [vtx]
   (org.apache.commons.math3.geometry.euclidean.threed.Vector3D.
-    (.x vtx)
-    (.y vtx)
-    (.z vtx)))
+    (.getX vtx)
+    (.getY vtx)
+    (.getZ vtx)))
 
 (defn marching-cubes
   "Convenience function for marching cubes."
