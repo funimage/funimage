@@ -21,9 +21,7 @@
                               io.scif.img.converters.PlaneConverterService
                               io.scif.img.ImgUtilityService
                               io.scif.services.DatasetIOService])
-      new-ij (net.imagej.ImageJ. context)
-      service-helper (org.scijava.service.ServiceHelper. context)]
-  (.createExactService service-helper org.scijava.thread.ThreadService)
+      new-ij (net.imagej.ImageJ. context)]
   (defonce ij new-ij))
 
 (defn open-img
