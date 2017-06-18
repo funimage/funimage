@@ -43,7 +43,9 @@ We should probably give a way of providing a custom dimension ordering."
       Positive samples are drawn from the labeling, while negative samples come from regions outside the labeling."
   [seg label]
   ;(println "generate-sample-points " (class label))
-  (loop [seg seg]
+  (loop [seg (assoc seg
+                    :positive-samples []
+                    :negative-samples [])]
     (if (or (< (count (:positive-samples seg))
                (:num-positive-samples seg))
             (< (count (:negative-samples seg))
@@ -121,19 +123,22 @@ We should probably give a way of providing a custom dimension ordering."
                     :feature-vals []
                     :target-vals (concat (repeat (count (:positive-samples seg)) 1)
                                          (repeat (count (:negative-samples seg)) 0)))
-         feature-map-fns (:feature-map-fns seg)]
+         feature-map-fns (:feature-map-fns seg)]    
     (if (empty? feature-map-fns)
       seg
       (let [feature-name (:name (first feature-map-fns))
+            _ (println "generate-dataset working on" feature-name)
             feature-map-fn (:fn (first feature-map-fns))
-            feature-map (funimage.imagej.ops.convert/float32
-                          (if (and
-                                (:cache-directory seg)
-                                (.exists (java.io.File. (str (:cache-directory seg)
-                                                             (:cache-basename seg) "_"
-                                                             feature-name ".tif"))))
-                            (imagej/open-img (str (:cache-directory seg) (:cache-basename seg) "_" feature-name ".tif"))
-                            (feature-map-fn input-img)))]
+            feature-map 
+                          
+                            (if (and
+                                  (:cache-directory seg)
+                                  (.exists (java.io.File. (str (:cache-directory seg)
+                                                               (:cache-basename seg) "_"
+                                                               feature-name ".tif"))))
+                              (imagej/open-img (str (:cache-directory seg) (:cache-basename seg) "_" feature-name ".tif"))
+                              (feature-map-fn input-img))]
+        (println "feature map generated.")
         (when (:cache-directory seg)
           (imagej/save-img feature-map (str (:cache-directory seg) (:cache-basename seg) "_" feature-name ".tif")))
         (recur (assoc seg
@@ -189,4 +194,14 @@ We should probably give a way of providing a custom dimension ordering."
       (imagej/save-img solution-img (str (:cache-directory seg) (:cache-basename seg) "_segmentation.tif")))
     solution-img))
 
-
+(defn save-segmentation-config
+  "Save a clean version of the segmentation configuration."
+  [seg filename]
+  (spit filename
+        {:weights seg
+         :positive-samples seg
+         :negative-samples seg
+         :feature-vals seg
+         :num-positive-samples seg
+         :num-negative-samples seg}))
+         

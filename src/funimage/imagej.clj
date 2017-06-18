@@ -4,7 +4,27 @@
             [funimage.img :as img])
   (:import [net.imagej ImageJ]))
 
-(defonce ij (net.imagej.ImageJ.))
+(let [context (org.scijava.Context.) 
+      #_(org.scijava.Context. [org.scijava.thread.ThreadService
+                              org.scijava.log.LogService
+                              org.scijava.io.IOService
+                              org.scijava.display.DisplayService
+                              org.scijava.convert.ConvertService
+                              org.scijava.command.CommandService
+                              org.scijava.input.InputService
+                              org.scijava.script.ScriptService
+                              org.scijava.app.StatusService
+                              net.imagej.ops.OpService
+                              io.scif.services.SCIFIODatasetService
+                              io.scif.xml.XMLService
+                              io.scif.services.InitializeService
+                              io.scif.img.converters.PlaneConverterService
+                              io.scif.img.ImgUtilityService
+                              io.scif.services.DatasetIOService])
+      new-ij (net.imagej.ImageJ. context)
+      service-helper (org.scijava.service.ServiceHelper. context)]
+  (.createExactService service-helper org.scijava.thread.ThreadService)
+  (defonce ij new-ij))
 
 (defn open-img
   "Open an image with ImageJ/SCIFIO"
