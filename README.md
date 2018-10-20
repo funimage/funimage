@@ -24,8 +24,8 @@ where the update site is: http://sites.imagej.net/Funimage/
 Add the following to your `project.clj`
 
 ```
-  :repositories [["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
-                 ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]]
+  :repositories [["imagej-releases" "https://maven.imagej.net/content/repositories/releases/"]
+                 ["imagej-snapshots" "https://maven.imagej.net/content/repositories/snapshots/"]]
                  
 ```
 
@@ -46,7 +46,7 @@ And add the following repository to the `pom.xml` as well:
 ```
 <repository>
 	<id>imagej.public</id>
-	<url>http://maven.imagej.net/content/groups/public</url>
+	<url>https://maven.imagej.net/content/groups/public</url>
 </repository>
 ```
 
