@@ -24,14 +24,14 @@
                  [sc.fiji/Auto_Threshold "1.16.0"]
                  ]
   :java-source-paths ["java"]
-  :repositories [["imagej" "http://maven.imagej.net/content/groups/hosted/"]
-                 ["imagej-releases" "http://maven.imagej.net/content/repositories/releases/"]
-                 ["ome maven" "http://artifacts.openmicroscopy.org/artifactory/maven/"]
-                 ["imagej-snapshots" "http://maven.imagej.net/content/repositories/snapshots/"]
-                 ["clojars2" {:url "http://clojars.org/repo/"
+  :repositories [["imagej" "https://maven.imagej.net/content/groups/hosted/"]
+                 ["imagej-releases" "https://maven.imagej.net/content/repositories/releases/"]
+                 ["ome maven" "https://artifacts.openmicroscopy.org/artifactory/maven/"]
+                 ["imagej-snapshots" "https://maven.imagej.net/content/repositories/snapshots/"]
+                 ["clojars2" {:url "https://clojars.org/repo/"
                              :username :env/LEIN_USERNAME
                               :password :env/LEIN_PASSWORD}]]
-  :deploy-repositories [["releases" {:url "http://maven.imagej.net/content/repositories/releases"
+  :deploy-repositories [["releases" {:url "https://maven.imagej.net/content/repositories/releases"
                                      ;; Select a GPG private key to use for
                                      ;; signing. (See "How to specify a user
                                      ;; ID" in GPG's manual.) GPG will
@@ -42,7 +42,7 @@
                                      :username :env/CI_DEPLOY_USERNAME
                                      :password :env/CI_DEPLOY_PASSWORD
                                      :sign-releases false}]
-                        ["snapshots" {:url "http://maven.imagej.net/content/repositories/snapshots"
+                        ["snapshots" {:url "https://maven.imagej.net/content/repositories/snapshots"
                                       :username :env/CI_DEPLOY_USERNAME
                                       :password :env/CI_DEPLOY_PASSWORD
                                       :sign-releases false}]]
